@@ -1,0 +1,24 @@
+# Secrets — never commit keys
+.env
+.env.*
+*.key
+
+# Generated audio
+output_audio/
+*.wav
+*.mp3
+*.m4a
+*.aiff
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/
+
+# Local agent tooling (private toolkit, not part of the project)
+.devin/
+_toolkit/
+
+# OS
+.DS_Store

@@ -1,0 +1,8 @@
+# Lenguas Indígenas MX — Python dependencies (Python 3.12)
+# System CLIs also required: yt-dlp, openai-whisper, ffmpeg (see README)
+
+transformers>=4.33.0
+torch>=2.0.0
+scipy>=1.10.0
+numpy<2.0.0
+yt-dlp>=2024.0.0
