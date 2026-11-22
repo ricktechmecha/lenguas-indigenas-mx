@@ -77,12 +77,11 @@ def main():
             has_voice = has_checkpoint(iso) or bool(r.get("mms"))
             ck_iso = iso
         gt = gt_code(ck_iso) if has_voice else None
-        line = (iso, name, reg, r.get("family") or "—",
-                r.get("word_order") or "—", gt or "—")
+        line = {"iso": iso, "name": name, "region": reg,
+                "family": r.get("family") or "—",
+                "order": r.get("word_order") or "—", "google": gt or "—"}
         tier_of[iso] = ("A" if has_voice and gt else "B" if has_voice else "C")
-        if has_voice and gt: tierA.append(line)
-        elif has_voice: tierB.append(line)
-        else: tierC.append(line)
+        (tierA if has_voice and gt else tierB if has_voice else tierC).append(line)
 
     # stats
     n_total_iso = 7900  # ISO 639-3 vivas aprox (ethnologue/sil)
@@ -106,8 +105,8 @@ def main():
         out.append(note + "\n")
         out.append("| ISO | Lengua | Región | Familia | Orden | Google |")
         out.append("|---|---|---|---|---|---|")
-        for iso, name, reg, fam, wo, gt in sorted(tier, key=lambda x: (x[2], x[1])):
-            out.append(f"| `{iso}` | {esc(name)} | {esc(reg)} | {esc(fam)} | {wo} | {gt} |")
+        for l in sorted(tier, key=lambda x: (x["region"], x["name"])):
+            out.append(f"| `{l['iso']}` | {esc(l['name'])} | {esc(l['region'])} | {esc(l['family'])} | {l['order']} | {l['google']} |")
         out.append("")
 
     table(tierA, "🟢 Tier A — cobertura completa (voz + traducción)",
@@ -125,13 +124,19 @@ def main():
                "`docs/CUALQUIER_IDIOMA.md` para agregar cualquier ISO vía `languages_extra.json`.\n")
 
     # México destacado
+    # JSON para el frontend
+    import json as _json
+    (ROOT / "data" / "cobertura.json").write_text(_json.dumps(
+        {"generated": "tools/build_coverage_matrix.py",
+         "tiers": {"A": tierA, "B": tierB, "C": tierC}},
+        ensure_ascii=False))
     mx_fams = ("Oto-Manguean","Mayan","Uto-Aztecan","Totonacan","Tequistlatecan","Huarpe","Corachol","Jicaque")
-    mx = [l for l in tierA + tierB + tierC if l[3] in mx_fams]
+    mx = [l for l in tierA + tierB + tierC if l["family"] in mx_fams]
     out.append("\n## México — detalle por lengua\n")
     out.append("| ISO | Lengua | Tier | Google | Orden |")
     out.append("|---|---|---|---|---|")
-    for iso, name, reg, fam, wo, gt in sorted(mx, key=lambda x: x[1]):
-        out.append(f"| `{iso}` | {esc(name)} | {tier_of.get(iso,'?')} | {gt} | {wo} |")
+    for l in sorted(mx, key=lambda x: x["name"]):
+        out.append(f"| `{l['iso']}` | {esc(l['name'])} | {tier_of.get(l['iso'],'?')} | {l['google']} | {l['order']} |")
     out.append("")
 
     OUT.write_text("\n".join(out))

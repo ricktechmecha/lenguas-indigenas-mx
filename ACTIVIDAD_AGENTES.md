@@ -4,6 +4,20 @@
 
 ---
 
+## 2026-11-22 ~23:45 — Devin (mac-lap)
+
+**Se pidió:** cerrar investigación, decir si el pipeline está completo, qué falta, y generar frontend con página de explicación + tabla de cobertura + visión de doblaje de series/películas.
+
+**Hecho:**
+- `app.py` ahora es sitio de 3 páginas (stdlib puro): `/` landing explicativa (qué hace, tiers, visión doblaje, tabla de recursos por tier, disclaimer), `/cobertura` tabla mundial interactiva (buscador + filtros tier/región, ~1,020 lenguas desde data/cobertura.json), `/convertir` la herramienta (sin cambios funcionales).
+- `tools/build_coverage_matrix.py` ahora emite también `data/cobertura.json`.
+- `docs/PLAN_RECURSOS_POR_IDIOMA.md`: veredicto del pipeline por etapa + piezas que faltan para doblaje (alineación temporal = la pieza clave, aeneas/stable-ts/atempo; mezcla ffmpeg; MMS ASR para sentido inverso) + qué pedir por cada tier (A: validación; B: corpus paralelo/fine-tune; C: grabaciones consentidas + GPU; D: stack completo).
+- Verificado: py_compile + las 3 rutas 200 + /api/coverage con tiers correctos.
+
+**Veredicto:** pipeline texto→audio COMPLETO para tier A/B. Doblaje de contenido = ingeniería de pipeline (alineación+mezcla), no modelo nuevo. Cuello real: traducción tier B.
+
+---
+
 ## 2026-11-22 ~23:15 — Devin (mac-lap)
 
 **Se pidió:** lista mundial de cobertura por idioma (cuáles cubre y cuáles no) en .md tabla.
