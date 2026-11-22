@@ -166,6 +166,9 @@ python3 conversor.py "texto" --lang nah --translator llama
 
 ```bash
 python3 app.py    # → http://127.0.0.1:8000
+#   /           landing: qué hace, tiers, visión de doblaje, recursos por tier
+#   /cobertura   tabla mundial interactiva (~1,020 lenguas)
+#   /convertir   la herramienta (texto/YouTube → audio + back-translation)
 ```
 
 Selector de lengua (curadas + ISO libre), texto o URL de YouTube, progreso

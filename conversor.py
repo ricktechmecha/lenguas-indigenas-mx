@@ -15,7 +15,7 @@ Dependencias:
   pip install scipy numpy  (para audio)
 """
 
-import os, sys, json, time, subprocess, tempfile, base64
+import os, sys, json, time, subprocess, tempfile, base64, shutil
 import urllib.request, urllib.error
 from pathlib import Path
 from typing import Optional
@@ -680,20 +680,29 @@ def tts_mms_local(text: str, lang_code: str, out_path: Path) -> bool:
     """Genera audio usando Meta MMS-TTS (requiere transformers instalado)."""
     return synthesize(text, lang_code, out_path) is not None
 
-def tts_mac_say(text: str, out_path: Path) -> bool:
-    """Fallback: TTS en español con `say` de macOS."""
+def tts_mac_say(text: str, out_path: Path):
+    """Fallback: TTS en español con `say` de macOS.
+    Devuelve el Path del audio generado (mp3 con ffmpeg, m4a con afconvert)."""
     aiff_path = out_path.with_suffix(".aiff")
     try:
         subprocess.run(["say", "-v", "Paulina", "-o", str(aiff_path), text],
                        check=True, capture_output=True, timeout=60)
-        subprocess.run(["ffmpeg", "-i", str(aiff_path), "-q:a", "4",
-                        str(out_path), "-y"], check=True, capture_output=True, timeout=30)
+        if shutil.which("ffmpeg"):
+            subprocess.run(["ffmpeg", "-i", str(aiff_path), "-q:a", "4",
+                            str(out_path), "-y"], check=True, capture_output=True, timeout=30)
+            final = out_path
+        else:
+            # afconvert es nativo de macOS: AIFF → M4A (AAC), sin ffmpeg
+            final = out_path.with_suffix(".m4a")
+            subprocess.run(["afconvert", "-f", "m4af", "-d", "aac",
+                            str(aiff_path), str(final)],
+                           check=True, capture_output=True, timeout=30)
         aiff_path.unlink(missing_ok=True)
-        print(f"  ✅ Audio (español fallback): {out_path.name}")
-        return True
+        print(f"  ✅ Audio (español fallback): {final.name}")
+        return final
     except Exception as e:
         print(f"  ❌ say fallback: {e}")
-        return False
+        return None
 
 # ─── PIPELINE PRINCIPAL ──────────────────────────────────────────────────────
 def convert(input_source: str, lang_code: str = "nah", output_name: str = None,
@@ -814,7 +823,11 @@ def convert(input_source: str, lang_code: str = "nah", output_name: str = None,
         print(f"      Ejecuta: pip install transformers scipy torch")
         print(f"  🔄 Usando fallback macOS say (en español)...")
         audio_out = OUTPUT_DIR / f"{base_name}_es_fallback.mp3"
-        success = tts_mac_say(translation, audio_out)
+        fb = tts_mac_say(translation, audio_out)
+        if fb:
+            success, audio_out = True, fb
+        else:
+            success = False
     
     if success:
         result["files"]["audio"] = str(audio_out)

@@ -4,6 +4,20 @@
 
 ---
 
+## 2026-11-23 ~00:20 — Devin (mac-lap)
+
+**Se pidió:** "haz todo lo que consideres" — cierre final.
+
+**Hecho:**
+- Back-translation de verificación en la UI: tras convertir, si Google soporta la lengua, re-traduce a español y lo muestra ("Significa en español"). Verificado: maya→es da "El niño come pan en casa de su abuela" — round-trip casi perfecto.
+- `tts_mac_say` fallback arreglado sin ffmpeg: usa `afconvert` nativo → .m4a (probado, genera audio real). Retorna Path real para el result.
+- app.py: server levantado con preview en :8000 (/, /cobertura, /convertir).
+- README actualizado con las 3 rutas.
+
+**Estado final:** sitio presentable completo + conversor verificado + docs de cierre (REVISION_FIRST_PRINCIPLES, PLAN_RECURSOS_POR_IDIOMA, LENGUAS_COBERTURA_MUNDIAL).
+
+---
+
 ## 2026-11-22 ~23:45 — Devin (mac-lap)
 
 **Se pidió:** cerrar investigación, decir si el pipeline está completo, qué falta, y generar frontend con página de explicación + tabla de cobertura + visión de doblaje de series/películas.

@@ -51,6 +51,21 @@ def run_job(job_id: str, inp: str, lang: str, translator: str):
     try:
         res = cv.convert(inp, lang, translator=translator,
                          on_step=step, fallback_say=False)
+        # Back-translation de verificación: si Google soporta la lengua,
+        # re-traducir a español para que el usuario vea el significado.
+        try:
+            from gtranslate import google_translate, gt_code
+            info = cv.resolve_language(lang) or {}
+            mms = info.get("mms") or ""
+            slug = mms.rsplit("-tts-", 1)[-1] if "-tts-" in mms else (mms or lang)
+            gt = gt_code(slug)
+            tr = res.get("translation")
+            if gt and tr and len(tr) < 4000:
+                bt = google_translate(tr, "es", source=gt)
+                if bt:
+                    res["back_translation"] = bt
+        except Exception:
+            pass
         with JOBS_LOCK:
             j = JOBS[job_id]
             j["status"] = "done" if res.get("files") else "error"
@@ -58,6 +73,7 @@ def run_job(job_id: str, inp: str, lang: str, translator: str):
                 "lang_name": res.get("lang_name"),
                 "engine": res.get("engine"),
                 "translation": res.get("translation"),
+                "back_translation": res.get("back_translation"),
                 "source_text": res.get("source_text"),
                 "tts": res.get("tts"),
                 "text_only": bool(res.get("text_only")),
@@ -269,6 +285,7 @@ function finish(j){
   let h='';
   if(j.status==='error')h+=`<div class="err">Error: ${j.error||r.error||'desconocido'}</div>`;
   if(r.translation)h+=`<label>Traducción</label><div class="mono">${esc(r.translation)}</div>`;
+  if(r.back_translation)h+=`<label>↩ Significa en español (verificación)</label><div class="mono" style="border-color:#1d5c38">${esc(r.back_translation)}</div>`;
   if(r.source_text&&r.translation)h+=`<label>Texto fuente</label><div class="mono">${esc(r.source_text).slice(0,600)}</div>`;
   const f=r.files||{};
   if(f.audio)h+=`<label>Audio</label><audio controls src="/audio/${f.audio}"></audio><div><a href="/audio/${f.audio}" download>⬇ Descargar .wav</a></div>`;
