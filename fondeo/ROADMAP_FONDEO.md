@@ -5,8 +5,8 @@
 
 | # | Fondeo | Premio | Deadline | Estado | Doc |
 |---|--------|--------|----------|--------|-----|
-| 1 | **Mozilla Foundation Fellowship** | $125,000 USD / 12 meses | **17-dic-2026** | 🟡 Borrador listo | `APLICACION_MOZILLA_FELLOWSHIP.md` |
-| 2 | **NLnet Restack** | €5,000–50,000 | **3-ene-2027** | 🟡 Borrador listo | `APLICACION_NLNET_RESTACK.md` |
+| 1 | **Mozilla Foundation Fellowship** | $125,000 USD / 12 meses | **17-dic-2026** (LOI ligera, no app completa) | 🟡 Borrador listo | `APLICACION_MOZILLA_FELLOWSHIP.md` |
+| 2 | **NLnet Restack** | €5,000–50,000 | 3-ene-2027 | ⚠️ **GenAI fuera de scope** salvo >1M usuarios — solo aplicar reformulado como open-data commons si sobra tiempo | `APLICACION_NLNET_RESTACK.md` |
 | 3 | **FLOSS/fund** | Variable | Rolling | 🟡 `funding.json` creado — falta enviar en floss.fund/submit | — |
 | 4 | **GitHub Sponsors** | Recurrente | Ya | 🟡 `FUNDING.yml` creado — falta activar en github.com/sponsors | — |
 | 5 | **GoFundMe / Donadora** | Meta $40,000 MXN | Cuando tengas el video | 🟡 Copy y guion listos | `CAMPAÑA_GOFUNDME.md` |
@@ -20,6 +20,15 @@
 | **AmericasNLP 2027** | Visibilidad académica | Papers ~ene-abr 2027. Escribir technical report del pipeline |
 | **Google Gemini Competition** | hasta $300K | Sin edición nueva confirmada; el pipeline ya usa Gemini |
 | **MIT Solve / Fast Forward** | Variable | Ciclos anuales Q1 2027 |
+
+## 📋 Requisitos detallados por programa → ver `REQUISITOS_Y_DOCUMENTOS.md`
+
+Nuevos hallazgos (22-nov):
+- Mozilla = solo **Letter of Intent** el 17-dic (ligera) — full app solo si te invitan (mar-2027)
+- Restack: GenAI fuera de scope — depriorizar
+- SECIHTI: registrarse en **Rizoma** + alta PFAE en SAT = llave federal
+- SACPC Lenguas Indígenas $100K: titular debe ser hablante → socio maya
+- Jugada maestra: email UADY (desbloquea SECTEI/SECIHTI/Lacuna/SACPC)
 
 ## ✅ Checklist semanal
 
