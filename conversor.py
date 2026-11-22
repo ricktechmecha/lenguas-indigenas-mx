@@ -25,9 +25,11 @@ from pathlib import Path
 from typing import Optional
 
 # ─── CONFIG ────────────────────────────────────────────────────────────────
-GOOGLE_KEY = os.getenv("GOOGLE_API_KEY", "")
-HF_TOKEN   = os.getenv("HF_TOKEN", "")
-OUTPUT_DIR = Path(os.getenv("OUTPUT_DIR", "output_audio"))
+GOOGLE_KEY  = os.getenv("GOOGLE_API_KEY", "")
+HF_TOKEN    = os.getenv("HF_TOKEN", "")
+OUTPUT_DIR  = Path(os.getenv("OUTPUT_DIR", "output_audio"))
+OLLAMA_HOST = os.getenv("OLLAMA_HOST", "http://localhost:11434")
+LLAMA_MODEL = os.getenv("LLAMA_MODEL", "llama3.1:8b")
 
 LANGUAGES = {
     "nah": {"name": "Náhuatl",        "mms": "facebook/mms-tts-nah", "gemini_hint": "náhuatl clásico de México central"},
@@ -147,6 +149,70 @@ Traducción al {lang_name}:"""
             return None
     return None
 
+def translate_with_llama(text: str, lang_code: str, retries: int = 2) -> Optional[str]:
+    """Traduce con Llama local vía Ollama (sin API key, sin costo, sin nube).
+    Requiere: `ollama serve` corriendo y el modelo descargado (`ollama pull llama3.1:8b`)."""
+    lang_info = LANGUAGES[lang_code]
+    lang_name = lang_info["name"]
+    lang_hint = lang_info["gemini_hint"]
+
+    prompt = f"""Translate the following text to {lang_name} ({lang_hint}).
+
+RULES:
+- Output ONLY the translation, no explanations or notes.
+- Use authentic vocabulary and correct grammar of the language.
+- If a word has no direct equivalent, use the most common loanword in that language.
+
+Text (Spanish):
+{text}
+
+Translation to {lang_name}:"""
+
+    payload = {
+        "model": LLAMA_MODEL,
+        "messages": [{"role": "user", "content": prompt}],
+        "stream": False,
+        "options": {"temperature": 0.3},
+    }
+    for attempt in range(retries):
+        try:
+            req = urllib.request.Request(
+                f"{OLLAMA_HOST}/api/chat",
+                data=json.dumps(payload).encode(),
+                headers={"Content-Type": "application/json"}, method="POST"
+            )
+            with urllib.request.urlopen(req, timeout=180) as r:
+                resp = json.loads(r.read())
+            translation = resp["message"]["content"].strip()
+            print(f"  ✅ Traducido a {lang_name} (Llama local): {translation[:80]}...")
+            return translation
+        except urllib.error.URLError as e:
+            if attempt == 0:
+                print(f"  ⚠️  Ollama no responde en {OLLAMA_HOST} — ejecuta `ollama serve`")
+            else:
+                print(f"  ❌ Error Llama/Ollama: {e}")
+                return None
+        except Exception as e:
+            print(f"  ❌ Error Llama/Ollama: {e}")
+            return None
+    return None
+
+def translate(text: str, lang_code: str, translator: str = "auto") -> Optional[str]:
+    """Traduce con el motor elegido. 'auto' = Gemini primero, Llama local de respaldo."""
+    if translator in ("auto", "gemini"):
+        if GOOGLE_KEY:
+            t = translate_with_gemini(text, lang_code)
+            if t:
+                return t
+            if translator == "gemini":
+                return None
+            print("  🔄 Gemini falló — intentando Llama local...")
+        elif translator == "auto":
+            print("  ⚠️  GOOGLE_API_KEY no configurada — usando Llama local directamente")
+    if translator in ("auto", "llama"):
+        return translate_with_llama(text, lang_code)
+    return None
+
 # ─── STEP 4: TTS EN LENGUA INDÍGENA ─────────────────────────────────────────
 def tts_mms_local(text: str, lang_code: str, out_path: Path) -> bool:
     """Genera audio usando Meta MMS-TTS (requiere transformers instalado)."""
@@ -195,7 +261,8 @@ def tts_mac_say(text: str, out_path: Path) -> bool:
         return False
 
 # ─── PIPELINE PRINCIPAL ──────────────────────────────────────────────────────
-def convert(input_source: str, lang_code: str = "nah", output_name: str = None) -> dict:
+def convert(input_source: str, lang_code: str = "nah", output_name: str = None,
+            translator: str = "auto") -> dict:
     """
     Convierte texto o video de YouTube a audio en lengua indígena.
     
@@ -263,7 +330,7 @@ def convert(input_source: str, lang_code: str = "nah", output_name: str = None) 
     if lang_code == "spa":
         translation = spanish_text
     else:
-        translation = translate_with_gemini(spanish_text, lang_code)
+        translation = translate(spanish_text, lang_code, translator)
     
     if not translation:
         print("❌ Sin traducción")
@@ -330,6 +397,9 @@ Ejemplos:
                         help="Listar lenguas disponibles")
     parser.add_argument("--outdir", default="output_audio",
                         help="Directorio de salida (default: output_audio)")
+    parser.add_argument("--translator", "-t", default="auto",
+                        choices=["auto", "gemini", "llama"],
+                        help="Motor de traducción: auto (Gemini→Llama), gemini, o llama (local vía Ollama, gratis)")
     
     args = parser.parse_args()
     
@@ -350,7 +420,7 @@ Ejemplos:
         parser.print_help()
         return
     
-    result = convert(args.input, args.lang, args.output)
+    result = convert(args.input, args.lang, args.output, args.translator)
     sys.exit(0 if result.get("files") else 1)
 
 

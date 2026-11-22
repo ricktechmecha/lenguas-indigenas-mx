@@ -71,7 +71,13 @@ python3 conversor.py "https://youtube.com/watch?v=VIDEO_ID" --lang yua
 
 # Custom output directory
 python3 conversor.py "texto" --lang mix --outdir ./salida
+
+# Fully offline: translate with local Llama via Ollama instead of Gemini
+# (requires: brew install ollama && ollama pull llama3.1:8b && ollama serve)
+python3 conversor.py "texto" --lang nah --translator llama
 ```
+
+**Translator options** (`--translator`): `auto` (default, Gemini with Llama fallback), `gemini`, or `llama` (local via [Ollama](https://ollama.com) — no API key, no cost, works offline).
 
 Output `.wav` files are written to `output_audio/` by default.
 
@@ -95,7 +101,7 @@ Indigenous languages are living heritage, not raw material. If you extend this t
 - [ ] Map INALI's 364 language variants to specific MMS checkpoints
 - [ ] Corpus mode: guided recording sessions with native speakers for an open dataset
 - [ ] Human-review workflow for translations (community validation loop)
-- [ ] Local open-source LLM fallback for translation (offline / key-free operation)
+- [x] Local open-source LLM fallback for translation (offline / key-free operation via Ollama)
 - [ ] Batch mode for institutional content (schools, community radio, public notices)
 
 ## Why this exists

@@ -1,0 +1,55 @@
+{
+  "version": "v1.0.0",
+  "entity": {
+    "type": "individual",
+    "role": "maintainer",
+    "name": "Rick (ricktechmecha)",
+    "description": "Independent developer building open-source accessibility tools for Mexican indigenous languages",
+    "webpageUrl": {
+      "url": "https://github.com/ricktechmecha",
+      "wellKnown": null
+    },
+    "avatarUrl": null,
+    "contact": {}
+  },
+  "projects": [
+    {
+      "guid": "lenguas-indigenas-mx",
+      "name": "Lenguas Indígenas MX",
+      "description": "Open-source pipeline that converts text or YouTube videos into spoken audio in 8 Mexican indigenous languages (náhuatl, maya yucateco, mixteco, zapoteco, otomí, tzotzil, tzeltal, mam) using Whisper + LLM translation + Meta MMS-TTS. Extensible to 1,100+ MMS languages. Funding supports a community-validated open speech corpus recorded with native speakers.",
+      "webpageUrl": {
+        "url": "https://github.com/ricktechmecha/lenguas-indigenas-mx",
+        "wellKnown": null
+      },
+      "repositoryUrl": {
+        "url": "https://github.com/ricktechmecha/lenguas-indigenas-mx",
+        "wellKnown": null
+      },
+      "licenses": ["MIT"],
+      "tags": ["accessibility", "indigenous-languages", "low-resource-languages", "text-to-speech", "mexico", "nlp", "whisper", "open-data"]
+    }
+  ],
+  "funding": {
+    "channels": [
+      {
+        "type": "other",
+        "address": "https://github.com/sponsors/ricktechmecha",
+        "description": "GitHub Sponsors"
+      },
+      {
+        "type": "bank",
+        "address": "Contact maintainer via GitHub for donation details",
+        "description": "Direct donations / fiscal sponsorship in progress"
+      }
+    ],
+    "plans": [
+      {
+        "name": "Corpus comunitario con hablantes nativos",
+        "description": "Pay native speakers to record and validate a free, open speech corpus for Mexican indigenous languages",
+        "amount": 5000,
+        "currency": "USD",
+        "frequency": "one-time"
+      }
+    ]
+  }
+}
