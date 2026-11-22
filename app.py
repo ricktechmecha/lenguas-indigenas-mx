@@ -78,6 +78,7 @@ def run_job(job_id: str, inp: str, lang: str, translator: str):
                 "tts": res.get("tts"),
                 "text_only": bool(res.get("text_only")),
                 "error": res.get("error"),
+                "suggestions": res.get("suggestions"),
                 "files": {k: Path(v).name for k, v in res.get("files", {}).items()},
             }
             if not j["result"]["files"] and not j["result"]["error"]:
@@ -283,7 +284,8 @@ function finish(j){
   if(r.tts){badge(r.tts.coverage<1?`alfabeto ${(r.tts.coverage*100).toFixed(0)}%`:'alfabeto 100%',r.tts.coverage<1?'b-warn':'b-ok');badge(r.tts.seconds+'s audio','b-ok');}
   if(r.text_only)badge('SOLO TEXTO (sin voz MMS)','b-no');
   let h='';
-  if(j.status==='error')h+=`<div class="err">Error: ${j.error||r.error||'desconocido'}</div>`;
+  if(j.status==='error'||r.error)h+=`<div class="err">Error: ${j.error||r.error||'desconocido'}</div>`;
+  if(r.suggestions&&r.suggestions.length)h+=`<div style="color:var(--warn);font-size:.85rem;margin-top:4px">¿Quisiste decir? ${r.suggestions.map(esc).join(', ')}</div>`;
   if(r.translation)h+=`<label>Traducción</label><div class="mono">${esc(r.translation)}</div>`;
   if(r.back_translation)h+=`<label>↩ Significa en español (verificación)</label><div class="mono" style="border-color:#1d5c38">${esc(r.back_translation)}</div>`;
   if(r.source_text&&r.translation)h+=`<label>Texto fuente</label><div class="mono">${esc(r.source_text).slice(0,600)}</div>`;

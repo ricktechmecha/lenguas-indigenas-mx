@@ -190,30 +190,37 @@ def suggest_languages(code: str) -> list:
 
 # ─── STEP 1: DESCARGA DE VIDEO ──────────────────────────────────────────────
 def download_youtube(url: str, out_dir: Path) -> Optional[Path]:
-    """Descarga audio de YouTube a MP3 usando yt-dlp con cookies de Chrome."""
+    """Descarga audio de YouTube con la lib yt_dlp (sin ffmpeg: Groq acepta m4a/webm).
+    Usa cookies del navegador Chrome si están disponibles."""
     out_dir.mkdir(parents=True, exist_ok=True)
     out_template = str(out_dir / "%(id)s.%(ext)s")
-    cmd = [
-        "yt-dlp",
-        "--cookies-from-browser", "chrome",
-        "-f", "bestaudio[ext=m4a]/bestaudio/best",
-        "--extract-audio", "--audio-format", "mp3", "--audio-quality", "128K",
-        "-o", out_template,
-        "--no-playlist", "-q", url
-    ]
-    try:
-        result = subprocess.run(cmd, capture_output=True, text=True, timeout=120)
-        # Find output file
-        mp3_files = list(out_dir.glob("*.mp3"))
-        if mp3_files:
-            mp3 = sorted(mp3_files, key=lambda f: f.stat().st_mtime)[-1]
-            print(f"  ✅ Audio descargado: {mp3.name} ({mp3.stat().st_size // 1024}KB)")
-            return mp3
-        print(f"  ❌ yt-dlp: {result.stderr[:200]}")
+    import yt_dlp
+    base = {"format": "bestaudio/best", "outtmpl": out_template,
+            "quiet": True, "no_warnings": True, "noplaylist": True}
+    # cookies del navegador: si fallan (perfil bloqueado/permisos), reintentar sin ellas
+    attempts = [dict(base, cookiesfrombrowser=("chrome",)), base]
+    info = None
+    last_err = None
+    for opts in attempts:
+        try:
+            with yt_dlp.YoutubeDL(opts) as ydl:
+                info = ydl.extract_info(url, download=True)
+            break
+        except Exception as e:
+            last_err = e
+    if not info:
+        print(f"  ❌ Error descarga YouTube: {last_err}")
         return None
-    except Exception as e:
-        print(f"  ❌ Error descarga: {e}")
-        return None
+    # localizar el archivo descargado por id+ext
+    vid = info.get("id") or info.get("url", "").split("v=")[-1].split("&")[0]
+    cands = sorted(out_dir.glob(f"{vid}.*"), key=lambda f: f.stat().st_mtime)
+    audio = [f for f in cands if f.suffix in (".m4a", ".webm", ".mp3", ".opus", ".ogg")]
+    pick = (audio or cands or [None])[-1]
+    if pick:
+        print(f"  ✅ Audio descargado: {pick.name} ({pick.stat().st_size // 1024}KB)")
+        return pick
+    print("  ❌ yt-dlp: no se encontró el archivo de audio")
+    return None
 
 # ─── STEP 2: TRANSCRIPCIÓN LOCAL CON WHISPER ────────────────────────────────
 def transcribe_with_whisper(audio_path: Path, model: str = "small", language: str = "es") -> Optional[str]:
@@ -257,8 +264,11 @@ def transcribe_with_groq(audio_path: Path, language: str = "es") -> Optional[str
     for name, val in [("model", "whisper-large-v3-turbo"), ("language", language),
                       ("response_format", "text")]:
         parts.append(f'--{boundary}\r\nContent-Disposition: form-data; name="{name}"\r\n\r\n{val}\r\n'.encode())
+    mime = {".mp3": "audio/mpeg", ".m4a": "audio/mp4", ".webm": "audio/webm",
+            ".ogg": "audio/ogg", ".opus": "audio/ogg", ".wav": "audio/wav",
+            ".flac": "audio/flac"}.get(audio_path.suffix.lower(), "audio/mpeg")
     parts.append(f'--{boundary}\r\nContent-Disposition: form-data; name="file"; filename="{audio_path.name}"\r\n'
-                 f'Content-Type: audio/mpeg\r\n\r\n'.encode() + audio_bytes + b"\r\n")
+                 f'Content-Type: {mime}\r\n\r\n'.encode() + audio_bytes + b"\r\n")
     parts.append(f"--{boundary}--\r\n".encode())
     body = b"".join(parts)
     for i, key in enumerate(GROQ_KEYS):
@@ -727,7 +737,8 @@ def convert(input_source: str, lang_code: str = "nah", output_name: str = None,
         print(f"   O cualquier ISO 639-3 con checkpoint MMS (--list-mms).")
         if sugg:
             print(f"   ¿Quisiste decir?: {sugg}")
-        return {}
+        return {"error": f"Lengua '{lang_code}' sin checkpoint MMS ni perfil.",
+                "suggestions": sugg or []}
     
     OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
     base_name = output_name or f"audio_{lang_code}_{int(time.time())}"
@@ -754,10 +765,10 @@ def convert(input_source: str, lang_code: str = "nah", output_name: str = None,
                 print("❌ No se pudo descargar el video")
                 return result
             
-            # Save MP3
-            mp3_dest = OUTPUT_DIR / f"{base_name}.mp3"
+            # Save audio (conservar extensión real: m4a/webm/mp3…)
+            mp3_dest = OUTPUT_DIR / f"{base_name}{mp3_file.suffix}"
             mp3_dest.write_bytes(mp3_file.read_bytes())
-            result["files"]["mp3"] = str(mp3_dest)
+            result["files"]["audio_fuente"] = str(mp3_dest)
             
             step_cb("transcribe")
             print("\n📝 PASO 2: Transcribiendo audio...")
@@ -779,7 +790,7 @@ def convert(input_source: str, lang_code: str = "nah", output_name: str = None,
     print(f"\n📄 Texto: {spanish_text[:100]}...")
     
     # ── PASO 2/3: Traducir ──
-    step = 3 if "mp3" in result["files"] else 2
+    step = 3 if "audio_fuente" in result["files"] else 2
     print(f"\n🔄 PASO {step}: Traduciendo a {lang_info['name']}...")
     
     step_cb("translate")

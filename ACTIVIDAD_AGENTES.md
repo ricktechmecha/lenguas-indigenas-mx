@@ -4,6 +4,26 @@
 
 ---
 
+## 2026-11-23 ~01:10 — Devin (mac-lap) — pruebas E2E + fixes reales
+
+**Pruebas entrada/salida por la app:**
+- yua: OK (google→MMS, back-translation perfecta)
+- hch: OK text_only, Groq sí produce wixárika plausible
+- nah (azz): OK — Groq produce náhuatl plausible, voz MMS 100%
+- nhe: OK — Google round-trip EXACTO ("Buenos días, ¿cómo estás hoy?")
+- Errores API: input vacío/lang inválido/JSON roto/traversal → todos 400/404 correctos
+
+**Bugs encontrados y corregidos:**
+1. `download_youtube` usaba CLI yt-dlp inexistente → reescrito con lib yt_dlp; cookies Chrome rompían extracción → fallback sin cookies; archivos webm/m4a sin ffmpeg (mime correcto por extensión); conservar extensión real (no renombrar a .mp3).
+2. `convert` devolvía {} para lengua inválida → ahora devuelve error+suggestions (UI los muestra).
+3. score_translation hardcodeaba 'groq' → agregado --translator; back-translate ahora prefiere Google cuando hay par.
+
+**YouTube E2E VERIFICADO:** video ES 5.5min → webm → Groq Whisper → Google Maya → MMS 35.5s audio real (1.1MB wav).
+
+**MAPA DEL HUECO (docs/MAPA_DEL_HUECO.md):** auto(google) vs groq — yua .75/.22, nah-hua .58/.27, mam .59/.13, kek .58/.04, zai .75/.00, quz .65/.32, ayr .65/.31, grn .70/.49. LLM se niega/inventa; NMT produce lengua real. Advertencia: round-trip mismo motor = fluidez, no exactitud.
+
+---
+
 ## 2026-11-23 ~00:20 — Devin (mac-lap)
 
 **Se pidió:** "haz todo lo que consideres" — cierre final.

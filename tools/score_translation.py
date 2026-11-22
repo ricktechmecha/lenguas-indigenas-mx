@@ -42,6 +42,20 @@ def _groq(prompt: str) -> str:
 
 def back_translate(text: str, lang_code: str) -> str:
     name = LANGUAGES.get(lang_code, {}).get("name", lang_code)
+    # Preferir Google NMT para el regreso si hay par (misma razón que forward):
+    # los LLM no conocen la mayoría de lenguas de bajos recursos.
+    try:
+        from gtranslate import google_translate, gt_code
+        info = resolve_language(lang_code) or {}
+        mms = info.get("mms") or ""
+        slug = mms.rsplit("-tts-", 1)[-1] if "-tts-" in mms else (mms or lang_code)
+        gt = gt_code(slug)
+        if gt:
+            bt = google_translate(text, "es", source=gt)
+            if bt:
+                return bt
+    except Exception:
+        pass
     prompt = (f"Translate the following text from {name} to Spanish. "
               f"Output ONLY the Spanish translation.\n\n{text}")
     try:
@@ -57,6 +71,8 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--lang", required=True)
     ap.add_argument("--out", default=None)
+    ap.add_argument("--translator", default="auto",
+                    help="auto (default, como producción) | groq | google | …")
     args = ap.parse_args()
 
     if not resolve_language(args.lang):
@@ -65,7 +81,7 @@ def main():
     rows, scores = [], []
     for s in SENTENCES:
         t0 = time.time()
-        fwd = translate(s, args.lang, "groq") or ""
+        fwd = translate(s, args.lang, args.translator) or ""
         back = back_translate(fwd, args.lang) if fwd else ""
         sc = sim(s, back)
         deg = _looks_degenerate(s, fwd)
@@ -77,7 +93,7 @@ def main():
     out = Path(args.out or f"output_audio/score_{args.lang}.md")
     out.parent.mkdir(exist_ok=True)
     L = [f"# Score back-translation → {name} ({args.lang})",
-         f"_{time.strftime('%Y-%m-%d %H:%M')} · Groq {GROQ_MODEL} · {len(SENTENCES)} frases_",
+         f"_{time.strftime('%Y-%m-%d %H:%M')} · motor {args.translator} · {len(SENTENCES)} frases_",
          f"\n## Promedio: **{avg:.2f}** / 1.00",
          "> Round-trip ES→lengua→ES. ~0.5+ conserva semántica aprox.; NO sustituye validación nativa.\n",
          "| # | Original | Traducción | Back-translation | score | deg | s |",
