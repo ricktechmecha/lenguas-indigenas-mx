@@ -4,6 +4,34 @@
 
 ---
 
+## 2026-11-22 ~22:30 — Devin (mac-lap)
+
+**Se pidió:** ejecutar la revisión first-principles + generar frontend, con mejor herramienta si existe.
+
+**Hecho:**
+- **Descubrimiento clave:** Google Translate NMT ya cubre ~110 pares MMS↔lengua verificados: nhe (náhuatl Huasteca), yua (maya), zap/zai (zapoteco), mam, kek, quz, ayr, grn + decenas de lenguas grandes. LLMs dan ~0.01 ahí; Google da traducciones reales (verificado E2E con yua → wav 4.6s, cobertura alfabeto 100%).
+- `gtranslate.py` nuevo backend (auto-primero cuando hay par; endpoint público sin key, oficial con GOOGLE_TRANSLATE_API_KEY). Mapa `GT_BY_MMS` 110 pares, solo variantes coincidentes (nhe NO se usa para azz).
+- `conversor.py`: `translate_ex` devuelve motor usado; `_looks_refusal` descarta disculpas del LLM (bug grave: se sintetizaban como "traducción"); `synthesize()` con caché de modelo, troceo por oraciones, `normalize_for_tts` (cobertura de grafemas); `text_only` para lenguas sin checkpoint (hch/tzo/tzh); `fallback_say` opt-out.
+- **Fix:** epitran había subido numpy a 2.x rompiendo torch 2.2.2 → pineado numpy<2.
+- `app.py` frontend: python3 app.py → :8000, catálogo con badges (voz/motor/alfabeto), jobs async, reproductor + descarga, aviso honesto. Verificado real con yua.
+- `docs/REVISION_FIRST_PRINCIPLES.md` con el análisis completo + 3 experimentos.
+- `docs/PROMPT_REVISION_Y_FRONTEND.md` (el prompt usado).
+
+**Pendientes:** mapa del hueco (score sweep), diccionario few-shot, Whisper en lengua indígena; validación nativa sigue pendiente.
+
+---
+
+## 2026-11-22 ~20:00 — Devin (mac-lap)
+
+**Se pidió:** priorizar APIs externas, avanzar todo, evaluar si es material de concursos.
+
+**Hecho:**
+- `tools/score_translation.py` — scorer objetivo vía back-translation ES→lengua→ES con Groq.
+- **Hallazgo clave para grants:** gpt-oss-120b saca **0.01** en zapoteco del Istmo (se niega o loopea aun con prompt tipológico) y 0.00 en `zai` crudo → los LLMs frontera NO resuelven lenguas de bajos recursos. Eso justifica el proyecto: la voz ya existe (MMS), el hueco es traducción/datos.
+- Veredicto concursos: SÍ como infraestructura+evaluación honesta+datasets; NO como "traductor que funciona".
+
+---
+
 ## 2026-11-22 ~19:00 — Devin (mac-lap)
 
 **Se pidió:** "haz todos los pendientes" — downloader de diccionarios/fonemas, Grambank, harness de evaluación.

@@ -20,6 +20,8 @@ import urllib.request, urllib.error
 from pathlib import Path
 from typing import Optional
 
+from gtranslate import google_translate, gt_code
+
 # ─── CONFIG ────────────────────────────────────────────────────────────────
 def _load_dotenv():
     """Carga .env del cwd si existe (KEY=VALUE, sin comillas obligatorias)."""
@@ -499,6 +501,32 @@ def translate_with_llama(text: str, lang_code: str, retries: int = 2) -> Optiona
             return None
     return None
 
+def translate_with_google(text: str, lang_code: str) -> Optional[str]:
+    """Google Translate (NMT dedicado). Solo para lenguas con par verificado
+    MMS↔Google (ver gtranslate.GT_BY_MMS) o campo "gt" en languages_extra.json."""
+    info = LANGUAGES[lang_code]
+    code = info.get("gt") or gt_code(info.get("mms"))
+    if not code:
+        return None
+    t = google_translate(text, code)
+    if t:
+        print(f"  ✅ Traducido (Google Translate '{code}'): {t[:80]}...")
+    return t
+
+def google_supported(lang_code: str) -> bool:
+    info = LANGUAGES.get(lang_code) or {}
+    return bool(info.get("gt") or gt_code(info.get("mms")))
+
+_REFUSALS = ("i'm sorry", "i’m sorry", "i am sorry", "sorry, i can", "i can't provide",
+             "i can’t provide", "i cannot provide", "lo siento", "no puedo proporcionar",
+             "no dispongo de", "as an ai", "i don't have enough", "i don’t have enough")
+
+def _looks_refusal(out: str) -> bool:
+    """El LLM se negó o se disculpó en vez de traducir — NO es una traducción,
+    y sintetizarla produciría audio falso."""
+    head = out.strip().lower()[:160]
+    return any(r in head for r in _REFUSALS)
+
 def _looks_degenerate(src: str, out: str) -> bool:
     """Detecta traducciones alucinadas: loops de tokens o salida desproporcionada.
     Común en lenguas de bajos recursos — mejor fallar que sintetizar basura."""
@@ -514,16 +542,18 @@ def _looks_degenerate(src: str, out: str) -> bool:
 
 # Orden 'auto': gratis primero (Groq), luego Gemini (si hay key), nubes de pago, local al final.
 TRANSLATORS = {
+    "google":       (translate_with_google,       None,          "Google Translate"),
     "groq":         (translate_with_groq,         GROQ_KEYS,     "GROQ_API_KEY"),
     "gemini":       (translate_with_gemini,       GOOGLE_KEYS,   "GOOGLE_API_KEY"),
     "ollama-cloud": (translate_with_ollama_cloud, OLLAMA_KEYS,   "OLLAMA_API_KEY"),
     "cerebras":     (translate_with_cerebras,     CEREBRAS_KEYS, "CEREBRAS_API_KEY"),
     "llama":        (translate_with_llama,        None,          "Ollama local"),
 }
-AUTO_ORDER = ["groq", "gemini", "ollama-cloud", "cerebras", "llama"]
+# NMT dedicado primero (cuando hay par verificado); LLMs después.
+AUTO_ORDER = ["google", "groq", "gemini", "ollama-cloud", "cerebras", "llama"]
 
-def translate(text: str, lang_code: str, translator: str = "auto") -> Optional[str]:
-    """Traduce con el motor elegido. 'auto' prueba cada backend con keys disponibles."""
+def translate_ex(text: str, lang_code: str, translator: str = "auto") -> tuple:
+    """Traduce y devuelve (traducción | None, motor usado | None)."""
     order = AUTO_ORDER if translator == "auto" else [translator]
     for name in order:
         fn, keys, env_hint = TRANSLATORS[name]
@@ -531,53 +561,124 @@ def translate(text: str, lang_code: str, translator: str = "auto") -> Optional[s
             if translator != "auto":
                 print(f"  ⚠️  {env_hint} no configurada")
             continue
+        if name == "google" and not google_supported(lang_code):
+            if translator != "auto":
+                print(f"  ⚠️  Google Translate no tiene par verificado para '{lang_code}'")
+                return None, None
+            continue
         t = fn(text, lang_code)
         if t:
             if _looks_degenerate(text, t):
                 print(f"  ⚠️  {name} produjo salida degenerada (loop/alucinación) — descartada")
-                t = None
+            elif name != "google" and _looks_refusal(t):
+                print(f"  ⚠️  {name} se negó a traducir — descartado (no es una traducción)")
             else:
-                return t
+                return t, name
         if translator != "auto":
-            return None
+            return None, None
         print(f"  🔄 {name} falló — probando siguiente motor...")
-    print("  ❌ Ningún traductor disponible. Opciones gratis:")
+    print("  ❌ Ningún traductor produjo una traducción utilizable.")
     print("     · Groq:  crea key en console.groq.com → export GROQ_API_KEY")
     print("     · Local: instala Ollama → ollama pull llama3.1:8b → --translator llama")
-    return None
+    return None, None
+
+def translate(text: str, lang_code: str, translator: str = "auto") -> Optional[str]:
+    """Traduce con el motor elegido. 'auto' prueba cada backend disponible."""
+    return translate_ex(text, lang_code, translator)[0]
 
 # ─── STEP 4: TTS EN LENGUA INDÍGENA ─────────────────────────────────────────
-def tts_mms_local(text: str, lang_code: str, out_path: Path) -> bool:
-    """Genera audio usando Meta MMS-TTS (requiere transformers instalado)."""
-    try:
+_TTS_CACHE: dict = {}
+_APOSTROPHES = "'’ʼ‘ꞌ`´"
+
+def _tts_load(model_id: str):
+    """Carga (y cachea) tokenizer+modelo MMS — evita recargar en cada petición."""
+    if model_id not in _TTS_CACHE:
         from transformers import VitsModel, AutoTokenizer
+        print(f"  🔊 Cargando modelo MMS-TTS: {model_id}")
+        hf_tok = HF_TOKEN or None  # modelos MMS son públicos; "" rompe el header
+        _TTS_CACHE[model_id] = (AutoTokenizer.from_pretrained(model_id, token=hf_tok),
+                                VitsModel.from_pretrained(model_id, token=hf_tok))
+    return _TTS_CACHE[model_id]
+
+def normalize_for_tts(text: str, vocab: set) -> tuple:
+    """Adapta el texto al alfabeto que el checkpoint conoce y mide qué se pierde.
+    MMS descarta en silencio los caracteres fuera de su vocabulario, lo que
+    cambia la pronunciación (p.ej. saltillo/glotal escrito con otro apóstrofo).
+    Devuelve (texto, {"coverage": 0-1, "dropped": [chars]})."""
+    import unicodedata
+    text = unicodedata.normalize("NFC", text)
+    known_apos = [a for a in _APOSTROPHES if a in vocab]
+    if known_apos:
+        for a in _APOSTROPHES:
+            if a not in vocab:
+                text = text.replace(a, known_apos[0])
+    letters = [c for c in text.lower() if c.isalpha() or c in _APOSTROPHES]
+    dropped = sorted({c for c in letters if c not in vocab})
+    lost = sum(1 for c in letters if c not in vocab)
+    cov = 1 - lost / len(letters) if letters else 1.0
+    return text, {"coverage": round(cov, 3), "dropped": dropped}
+
+def _tts_chunks(text: str, limit: int = 220) -> list:
+    """Oraciones cortas: VITS se degrada y gasta mucha RAM con entradas largas."""
+    import re
+    chunks, buf = [], ""
+    for part in re.split(r"(?<=[.!?…;:])\s+|\n+", text.strip()):
+        part = part.strip()
+        if not part:
+            continue
+        while len(part) > limit:
+            cut = part.rfind(" ", 0, limit)
+            cut = cut if cut > 40 else limit
+            chunks.append(part[:cut]); part = part[cut:].strip()
+        if buf and len(buf) + len(part) + 1 > limit:
+            chunks.append(buf); buf = part
+        else:
+            buf = f"{buf} {part}".strip()
+    if buf:
+        chunks.append(buf)
+    return chunks
+
+def synthesize(text: str, lang_code: str, out_path: Path) -> Optional[dict]:
+    """MMS-TTS → .wav. Devuelve info {"coverage", "dropped", "seconds"} o None."""
+    try:
         import torch, scipy.io.wavfile as wavfile
         import numpy as np
-        
         model_id = LANGUAGES[lang_code]["mms"]
         if not model_id:
-            return False
-        
-        print(f"  🔊 Cargando modelo MMS-TTS: {model_id}")
-        hf_tok    = HF_TOKEN or None  # modelos MMS son públicos; "" rompe el header
-        tokenizer = AutoTokenizer.from_pretrained(model_id, token=hf_tok)
-        model     = VitsModel.from_pretrained(model_id, token=hf_tok)
-        
-        inputs  = tokenizer(text, return_tensors="pt")
-        with torch.no_grad():
-            output = model(**inputs).waveform
-        
-        waveform = output.squeeze().numpy()
-        wavfile.write(str(out_path), rate=model.config.sampling_rate,
-                      data=(waveform * 32767).astype(np.int16))
-        print(f"  ✅ Audio generado: {out_path.name}")
-        return True
+            return None
+        tokenizer, model = _tts_load(model_id)
+        text, info = normalize_for_tts(text, set(tokenizer.get_vocab()))
+        if info["dropped"]:
+            print(f"  ⚠️  Grafemas fuera del alfabeto del modelo (se omiten al hablar): "
+                  f"{' '.join(info['dropped'])} — cobertura {info['coverage']:.0%}")
+        rate = model.config.sampling_rate
+        pause = np.zeros(int(rate * 0.25), dtype=np.float32)
+        waves = []
+        for chunk in _tts_chunks(text):
+            inputs = tokenizer(chunk, return_tensors="pt")
+            if inputs["input_ids"].shape[-1] == 0:
+                continue
+            with torch.no_grad():
+                waves += [model(**inputs).waveform.squeeze().numpy(), pause]
+        if not waves:
+            print("  ❌ TTS: ningún carácter del texto está en el alfabeto del modelo")
+            return None
+        waveform = np.concatenate(waves[:-1])
+        wavfile.write(str(out_path), rate=rate,
+                      data=(np.clip(waveform, -1, 1) * 32767).astype(np.int16))
+        info["seconds"] = round(len(waveform) / rate, 1)
+        print(f"  ✅ Audio generado: {out_path.name} ({info['seconds']}s)")
+        return info
     except ImportError:
         print("  ⚠️  transformers no instalado — usa: pip install transformers scipy")
-        return False
+        return None
     except Exception as e:
         print(f"  ❌ Error TTS: {e}")
-        return False
+        return None
+
+def tts_mms_local(text: str, lang_code: str, out_path: Path) -> bool:
+    """Genera audio usando Meta MMS-TTS (requiere transformers instalado)."""
+    return synthesize(text, lang_code, out_path) is not None
 
 def tts_mac_say(text: str, out_path: Path) -> bool:
     """Fallback: TTS en español con `say` de macOS."""
@@ -596,7 +697,8 @@ def tts_mac_say(text: str, out_path: Path) -> bool:
 
 # ─── PIPELINE PRINCIPAL ──────────────────────────────────────────────────────
 def convert(input_source: str, lang_code: str = "nah", output_name: str = None,
-            translator: str = "auto", stt: str = "auto") -> dict:
+            translator: str = "auto", stt: str = "auto",
+            on_step=None, fallback_say: bool = True) -> dict:
     """
     Convierte texto o video de YouTube a audio en lengua indígena.
     
@@ -622,6 +724,7 @@ def convert(input_source: str, lang_code: str = "nah", output_name: str = None,
     base_name = output_name or f"audio_{lang_code}_{int(time.time())}"
     
     result = {"lang": lang_code, "lang_name": lang_info["name"], "files": {}}
+    step_cb = on_step or (lambda *_: None)
     
     print(f"\n{'='*60}")
     print(f"🌿 CONVERSOR LENGUAS INDÍGENAS DE MÉXICO")
@@ -633,6 +736,7 @@ def convert(input_source: str, lang_code: str = "nah", output_name: str = None,
     spanish_text = None
     
     if input_source.startswith(("http://", "https://", "www.")):
+        step_cb("download")
         print("\n📥 PASO 1: Descargando video...")
         with tempfile.TemporaryDirectory() as tmp:
             tmp_path  = Path(tmp)
@@ -646,6 +750,7 @@ def convert(input_source: str, lang_code: str = "nah", output_name: str = None,
             mp3_dest.write_bytes(mp3_file.read_bytes())
             result["files"]["mp3"] = str(mp3_dest)
             
+            step_cb("transcribe")
             print("\n📝 PASO 2: Transcribiendo audio...")
             spanish_text = transcribe(mp3_dest, stt)
     else:
@@ -654,7 +759,9 @@ def convert(input_source: str, lang_code: str = "nah", output_name: str = None,
     
     if not spanish_text:
         print("❌ Sin texto para procesar")
+        result["error"] = "No se pudo obtener texto de la fuente"
         return result
+    result["source_text"] = spanish_text
     
     # Save transcription/text
     txt_path = OUTPUT_DIR / f"{base_name}_es.txt"
@@ -666,14 +773,17 @@ def convert(input_source: str, lang_code: str = "nah", output_name: str = None,
     step = 3 if "mp3" in result["files"] else 2
     print(f"\n🔄 PASO {step}: Traduciendo a {lang_info['name']}...")
     
+    step_cb("translate")
     if lang_code == "spa":
-        translation = spanish_text
+        translation, engine = spanish_text, "none"
     else:
-        translation = translate(spanish_text, lang_code, translator)
+        translation, engine = translate_ex(spanish_text, lang_code, translator)
     
     if not translation:
         print("❌ Sin traducción")
+        result["error"] = "Ningún motor produjo una traducción utilizable para esta lengua"
         return result
+    result["translation"], result["engine"] = translation, engine
     
     trad_path = OUTPUT_DIR / f"{base_name}_{lang_code}.txt"
     trad_path.write_text(translation, encoding="utf-8")
@@ -685,9 +795,21 @@ def convert(input_source: str, lang_code: str = "nah", output_name: str = None,
     
     audio_out = OUTPUT_DIR / f"{base_name}_{lang_code}.wav"
     
-    # Try MMS-TTS first, fallback to say
-    success = tts_mms_local(translation, lang_code, audio_out)
-    if not success:
+    if not lang_info.get("mms") and lang_code != "spa":
+        # Sin checkpoint MMS: leerlo con una voz en español sería audio falso.
+        print("  ℹ️  Esta lengua no tiene voz MMS publicada — se entrega solo texto.")
+        result["text_only"] = True
+        step_cb("done")
+        return result
+    
+    step_cb("tts")
+    tts_info = synthesize(translation, lang_code, audio_out)
+    success = tts_info is not None
+    if success:
+        result["tts"] = tts_info
+    elif not fallback_say:
+        result["error"] = "La síntesis de voz falló"
+    if not success and fallback_say:
         print(f"  ⚠️  MMS-TTS no disponible — instalando dependencias...")
         print(f"      Ejecuta: pip install transformers scipy torch")
         print(f"  🔄 Usando fallback macOS say (en español)...")
@@ -696,6 +818,7 @@ def convert(input_source: str, lang_code: str = "nah", output_name: str = None,
     
     if success:
         result["files"]["audio"] = str(audio_out)
+    step_cb("done")
     
     # ── RESUMEN ──
     print(f"\n{'='*60}")
@@ -748,8 +871,8 @@ Ejemplos:
     parser.add_argument("--outdir", default="output_audio",
                         help="Directorio de salida (default: output_audio)")
     parser.add_argument("--translator", "-t", default="auto",
-                        choices=["auto", "groq", "gemini", "ollama-cloud", "cerebras", "llama"],
-                        help="Traductor: auto (prueba todos), groq (gratis), gemini, "
+                        choices=["auto", "google", "groq", "gemini", "ollama-cloud", "cerebras", "llama"],
+                        help="Traductor: auto (Google NMT si hay par, luego LLMs), google, groq, gemini, "
                              "ollama-cloud, cerebras, o llama (Ollama local)")
     parser.add_argument("--stt", default="auto", choices=["auto", "groq", "local"],
                         help="Transcripción: auto (Groq si hay key), groq (Whisper API), local (whisper CLI)")

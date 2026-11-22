@@ -162,6 +162,23 @@ python3 conversor.py "texto" --lang mix --outdir ./salida
 python3 conversor.py "texto" --lang nah --translator llama
 ```
 
+**Frontend web** (sin build steps):
+
+```bash
+python3 app.py    # → http://127.0.0.1:8000
+```
+
+Selector de lengua (curadas + ISO libre), texto o URL de YouTube, progreso
+por pasos, traducción + audio + cobertura de alfabeto. Solo localhost.
+
+**Google Translate backend** (`gtranslate.py`): para las ~110 lenguas con par
+MMS↔Google verificado (náhuatl Huasteca `nhe`, maya `yua`, zapoteco `zai`,
+mam, q'eqchi' `kek`, quechua `quz`, aymara `ayr`, guaraní `grn`…), `auto` usa
+primero el NMT dedicado — los LLMs fallan ahí (zapoteco ≈ 0.01). Sin key usa
+el endpoint público no-oficial; con `GOOGLE_TRANSLATE_API_KEY` usa la API
+oficial de Cloud Translation (misma ruta de código). El mapa completo está
+en `gtranslate.GT_BY_MMS`.
+
 **Translator options** (`--translator`):
 
 | Value | Backend | Cost |
