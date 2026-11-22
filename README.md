@@ -56,6 +56,27 @@ the full table.
 Mexico has 68 linguistic groupings and 364 variants (INALI). Mapping the
 remaining INALI variants to their closest MMS checkpoint is on the roadmap.
 
+### Any language in the world
+
+`--lang` is not limited to the curated Mexican list. Resolution order:
+
+1. Curated table above (`--list-langs`)
+2. Your own profiles in `languages_extra.json` (see
+   `languages_extra.json.example` — name, checkpoint, translation hint,
+   dictionary/phoneme sources, license, speaker-validation flag)
+3. **Any ISO 639-3 code with a published MMS checkpoint** — ~999 verified in
+   `data/mms_checkpoints.json` (`--list-mms`). Common macrolanguage aliases
+   like `que` → `quz` and `swa` → `swh` resolve automatically.
+
+```bash
+python3 conversor.py "Buenos días" --lang quz   # Quechua
+python3 conversor.py "Buenos días" --lang ara   # Arabic
+```
+
+Full recipe for homologating a new language — dictionaries (PanLex,
+wiktextract), phoneme inventories (PHOIBLE, eSpeak NG, epitran), corpora and
+the fine-tuning path: **[docs/CUALQUIER_IDIOMA.md](docs/CUALQUIER_IDIOMA.md)**.
+
 ## Install
 
 Requires **Python 3.12** plus a few system tools:

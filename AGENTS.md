@@ -2,7 +2,7 @@
 
 ## Qué es este proyecto
 
-Conversor de contenido (texto o video de YouTube) a audio en lenguas indígenas mexicanas. Pipeline: yt-dlp → Whisper → Gemini Flash (traducción) → Meta MMS-TTS → .wav. 8 lenguas validadas (náhuatl, maya, mixteco, zapoteco, otomí, tzotzil, tzeltal, mam); extensible a las 1,100+ de MMS-TTS.
+Conversor de contenido (texto o video de YouTube) a audio en lenguas indígenas. Pipeline: yt-dlp → Whisper (local o Groq API) → traducción multi-backend (Groq/Gemini/Ollama) → Meta MMS-TTS → .wav. 17 lenguas mexicanas curadas + variantes, más **cualquier ISO 639-3 con checkpoint MMS** (~999 en `data/mms_checkpoints.json`, `--list-mms`) y perfiles propios vía `languages_extra.json` (ver `docs/CUALQUIER_IDIOMA.md`). Tzotzil/tzeltal NO tienen checkpoint MMS.
 
 **Objetivo:** publicarlo open-source + aplicar a grants de datasets/accesibilidad (Lacuna Fund, Mozilla OMSF, AmericasNLP).
 

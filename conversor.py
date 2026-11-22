@@ -5,14 +5,10 @@ Conversor de Texto/Video a Audio en Lenguas Indígenas de México
 Pipeline: YouTube URL / texto → MP3 → transcripción → traducción → audio en lengua indígena
 
 Lenguas soportadas (vía Meta MMS-TTS):
-  nah  - Náhuatl
-  yua  - Maya Yucateco
-  mix  - Mixteco
-  zap  - Zapoteco (variante)
-  oto  - Otomí / Hñähñu
-  tzo  - Tzotzil
-  tzh  - Tzeltal
-  mam  - Mam (Maya)
+  - 17 lenguas mexicanas curadas + variantes (ver LANGUAGES / --list-langs)
+  - CUALQUIER código ISO 639-3 con checkpoint MMS (~1,100 lenguas del mundo)
+    vía data/mms_checkpoints.json — ej: --lang que (quechua), --lang arb (árabe)
+  - Perfiles propios en languages_extra.json (ver languages_extra.json.example)
 
 Dependencias:
   pip install transformers soundfile yt-dlp playwright
@@ -103,6 +99,80 @@ LANGUAGES = {
     # ── demo ──
     "spa": {"name": "Español (demo)", "mms": None, "hint": "español"},
 }
+
+# ─── RESOLUCIÓN UNIVERSAL DE LENGUA ─────────────────────────────────────────
+# Orden: LANGUAGES (curado MX) → languages_extra.json (packs del usuario) →
+# data/mms_checkpoints.json (cualquier ISO 639-3 con checkpoint MMS publicado).
+_MMS_CATALOG: Optional[dict] = None
+
+# Macrolenguas ISO 639-2/639-3 → variante MMS representativa.
+# MMS publica por lengua individual, no por macrolengua.
+LANG_ALIASES = {
+    "que": "quz",   # Quechua → Quechua sureño (Cusco)
+    "swa": "swh",   # Swahili → Swahili
+    "aym": "ayr",   # Aymara → Aymara central
+}
+
+def _extra_languages() -> dict:
+    """Packs de lengua del usuario: languages_extra.json en cwd o junto al script.
+    Esquema: {"code": {"name": ..., "mms": "facebook/mms-tts-xxx"|null, "hint": ...}}"""
+    for p in (Path("languages_extra.json"),
+              Path(__file__).resolve().parent / "languages_extra.json"):
+        if p.exists():
+            try:
+                return json.loads(p.read_text(encoding="utf-8"))
+            except Exception as e:
+                print(f"  ⚠️  {p.name} inválido: {e}")
+    return {}
+
+def _mms_catalog() -> dict:
+    """Catálogo local de checkpoints MMS (999 códigos verificados vs HF)."""
+    global _MMS_CATALOG
+    if _MMS_CATALOG is None:
+        cat = Path(__file__).resolve().parent / "data" / "mms_checkpoints.json"
+        try:
+            _MMS_CATALOG = json.loads(cat.read_text(encoding="utf-8")) if cat.exists() else {}
+        except Exception:
+            _MMS_CATALOG = {}
+    return _MMS_CATALOG
+
+def resolve_language(code: str) -> Optional[dict]:
+    """Resuelve un código de lengua a {name, mms, hint}. Cachea en LANGUAGES."""
+    code = code.strip().lower()
+    if code in LANGUAGES:
+        return LANGUAGES[code]
+    for code_key in (code, code.replace("-", "_")):
+        extra = _extra_languages().get(code_key)
+        if extra:
+            info = {"name": extra.get("name", code_key),
+                    "mms":  extra.get("mms"),
+                    "hint": extra.get("hint", extra.get("name", code_key))}
+            LANGUAGES[code_key] = info
+            return info
+    catalog = _mms_catalog()
+    if code not in catalog and code in LANG_ALIASES and LANG_ALIASES[code] in catalog:
+        alias = LANG_ALIASES[code]
+        info = {"name": f"Lengua '{code}' (via {alias})",
+                "mms":  catalog[alias],
+                "hint": f"the language with ISO 639-3 code {alias}"}
+        LANGUAGES[code] = info
+        print(f"  🌍 '{code}' → variante MMS '{alias}' ({catalog[alias]})")
+        return info
+    if code in catalog:
+        info = {"name": f"Lengua ISO 639-3 '{code}'",
+                "mms":  catalog[code],
+                "hint": f"the language with ISO 639-3 code {code}"}
+        LANGUAGES[code] = info
+        print(f"  🌍 '{code}' resuelto desde catálogo MMS → {catalog[code]}")
+        print(f"      (sin perfil curado: agrega nombre/pista en languages_extra.json)")
+        return info
+    return None
+
+def suggest_languages(code: str) -> list:
+    """Códigos parecidos para el mensaje de error."""
+    code = code.strip().lower()
+    pool = list(LANGUAGES) + list(_extra_languages()) + list(_mms_catalog())
+    return [c for c in pool if c.startswith(code[:2]) or code[:2] in c][:8]
 
 # ─── STEP 1: DESCARGA DE VIDEO ──────────────────────────────────────────────
 def download_youtube(url: str, out_dir: Path) -> Optional[Path]:
@@ -477,9 +547,14 @@ def convert(input_source: str, lang_code: str = "nah", output_name: str = None,
     Returns:
         dict con paths de archivos generados
     """
-    lang_info = LANGUAGES.get(lang_code)
+    lang_info = resolve_language(lang_code)
     if not lang_info:
-        print(f"❌ Lengua '{lang_code}' no soportada. Disponibles: {list(LANGUAGES.keys())}")
+        sugg = suggest_languages(lang_code)
+        print(f"❌ Lengua '{lang_code}' sin checkpoint MMS ni perfil.")
+        print(f"   Curadas: {list(LANGUAGES.keys())}")
+        print(f"   O cualquier ISO 639-3 con checkpoint MMS (--list-mms).")
+        if sugg:
+            print(f"   ¿Quisiste decir?: {sugg}")
         return {}
     
     OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
@@ -588,16 +663,27 @@ Ejemplos:
   python conversor.py "Hola, bienvenido a la comunidad" --lang yua
 
   # Listar lenguas disponibles
-  python conversor.py --list-langs
+  python conversor.py --list-langs        # curadas MX
+  python conversor.py --list-mms          # ~1,100 checkpoints MMS del mundo
+
+  # Cualquier lengua del mundo con checkpoint MMS (ISO 639-3)
+  python conversor.py "Hola mundo" --lang que   # quechua
+  python conversor.py "Hola mundo" --lang haw   # hawaiano
+
+  # Agrega tus propios perfiles en languages_extra.json
+  # (ver languages_extra.json.example y docs/CUALQUIER_IDIOMA.md)
         """
     )
     parser.add_argument("input", nargs="?", help="URL de YouTube o texto en español")
     parser.add_argument("--lang", "-l", default="nah",
-                        help="Código de lengua destino (default: nah=Náhuatl)")
+                        help="Código curado, ISO 639-3 MMS, o pack de languages_extra.json "
+                             "(default: nah=Náhuatl)")
     parser.add_argument("--output", "-o", default=None,
                         help="Nombre base para archivos de salida")
     parser.add_argument("--list-langs", action="store_true",
-                        help="Listar lenguas disponibles")
+                        help="Listar lenguas curadas (México)")
+    parser.add_argument("--list-mms", action="store_true",
+                        help="Listar todos los códigos ISO 639-3 con checkpoint MMS")
     parser.add_argument("--outdir", default="output_audio",
                         help="Directorio de salida (default: output_audio)")
     parser.add_argument("--translator", "-t", default="auto",
@@ -613,12 +699,26 @@ Ejemplos:
     OUTPUT_DIR = Path(args.outdir)
     
     if args.list_langs:
-        print("\n🌿 LENGUAS INDÍGENAS DE MÉXICO DISPONIBLES\n")
-        print(f"{'Código':<6} {'Nombre':<20} {'Modelo TTS'}")
-        print("-"*55)
+        print("\n🌿 LENGUAS CURADAS (MÉXICO)\n")
+        print(f"{'Código':<8} {'Nombre':<28} {'Modelo TTS'}")
+        print("-"*60)
         for code, info in LANGUAGES.items():
             mms = info["mms"] or "— (usa español)"
-            print(f"  {code:<6} {info['name']:<20} {mms}")
+            print(f"  {code:<8} {info['name']:<28} {mms}")
+        extra = _extra_languages()
+        if extra:
+            print(f"\n📦 PACKS EXTRA (languages_extra.json): {list(extra.keys())}")
+        print(f"\n🌍 + {len(_mms_catalog())} códigos ISO 639-3 del mundo (--list-mms)")
+        print()
+        return
+
+    if args.list_mms:
+        catalog = _mms_catalog()
+        print(f"\n🌍 CHECKPOINTS MMS DISPONIBLES ({len(catalog)} códigos)\n")
+        codes = sorted(catalog)
+        for i in range(0, len(codes), 8):
+            print("  " + "  ".join(f"{c:<24}" for c in codes[i:i+8]))
+        print(f"\nUsa cualquiera directo: --lang <codigo>  (ej: --lang que)")
         print()
         return
     

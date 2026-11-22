@@ -4,6 +4,26 @@
 
 ---
 
+## 2026-11-22 ~16:30 — Devin (mac-lap)
+
+**Se pidió:** localizar la "super investigación" de entrenar modelos con audio / extender a todos los dialectos del mundo, revisar keys de video_creator (Gemini etc.) y **homologar el pipeline para cualquier idioma**.
+
+**Hecho:**
+- Investigación original encontrada en piezas: `video_creator/docs/LENGUAS_INDIGENAS_Y_VOZ.md` (+ FIRMA_VOZ, EMOCIONES_VOZ, TOOLKIT_IA_INVESTIGACION), `lyricforge/REPORTE_FINAL.md`, `ricpersonal/PLAN_ENTRENAR_LLMS.md`. No existe UN doc — consolidado en `docs/CUALQUIER_IDIOMA.md`.
+- Keys de video_creator revisadas: la Gemini de su `.env`/`CREDENCIALES.md` es la misma muerta (400/403); ElevenLabs viva; Groq ya migrada.
+- **Pipeline homologado a cualquier idioma:**
+  - `data/mms_checkpoints.json` — 999 checkpoints MMS verificados (códigos ISO 639-3).
+  - `resolve_language()`: `--lang` resuelve curados → `languages_extra.json` → catálogo MMS → alias de macrolenguas (que→quz, swa→swh) → sugerencias.
+  - `--list-mms` nuevo; `--list-langs` muestra packs extra + conteo del catálogo.
+  - `languages_extra.json.example` con esquema completo (iso639_3, glottocode, script, fuentes, licencia, validado_por_hablante).
+  - `docs/CUALQUIER_IDIOMA.md`: receta de homologación — diccionarios (PanLex, wiktextract, Glosbe), fonemas (PHOIBLE, eSpeak NG, epitran), corpora (Common Voice/FLEURS/OpenSLR), ruta de fine-tune (VITS monohablante, XLSR ASR, LoRA NLLB), reglas de licencia/consentimiento.
+- **Smoke test real:** `--lang quz` end-to-end → traducción Groq ("Allin p'unchay, comunidadman hamuqkuna") + `smoke_quz_quz.wav` 74KB. Funciona con lenguas no mexicanas.
+- AGENTS.md/README actualizados (ya no "8 lenguas" ni solo MX).
+
+**Pendientes:** descargadores reales de diccionario/fonemas (fuentes documentadas, sin implementar); benchmark de modelos Ollama locales; ninguna traducción validada por hablante nativo; `haw` (hawaiano) y otros sin checkpoint MMS publicado.
+
+---
+
 ## 2026-11-22 ~14:25 — Devin (mac-lap)
 
 **Se pidió:** recuperar API keys de otros proyectos (ricpersonal, video_creator), revisar/mejorar el conversor, verificar doc de entrenamiento de LLMs.

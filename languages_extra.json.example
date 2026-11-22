@@ -1,0 +1,24 @@
+{
+  "_comentario": "Copia este archivo a languages_extra.json y agrega tus lenguas. Esquema completo en docs/CUALQUIER_IDIOMA.md. Campos mínimos: name, mms, hint.",
+
+  "que": {
+    "name": "Quechua sureño",
+    "mms": "facebook/mms-tts-quz",
+    "hint": "quechua sureño (Cusco-Bolivia)",
+    "iso639_3": "quz",
+    "glottocode": "cusc1236",
+    "script": "latn",
+    "fuentes": {
+      "diccionario": "PanLex (panlex.org) / wiktextract",
+      "fonemas": "PHOIBLE (phoible.org) / eSpeak NG"
+    },
+    "licencia_datos": "verificar por fuente",
+    "validado_por_hablante": false
+  },
+
+  "mi-lengua": {
+    "name": "Ejemplo sin checkpoint MMS — solo traducción",
+    "mms": null,
+    "hint": "nombre y variante exacta para el prompt del traductor"
+  }
+}
