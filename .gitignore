@@ -22,3 +22,6 @@ _toolkit/
 
 # OS
 .DS_Store
+
+# caché WALS regenerable (tools/build_language_profiles.py)
+data/_wals/

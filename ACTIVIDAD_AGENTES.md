@@ -4,6 +4,22 @@
 
 ---
 
+## 2026-11-22 ~17:30 — Devin (mac-lap)
+
+**Se pidió:** inyectar estructura gramatical por lengua al prompt de traducción ("excel" mínimo-completo de rasgos), re-revisar proyectos similares en GitHub, empezar con nuestras lenguas pero extensible (India, etc.).
+
+**Hecho:**
+- `tools/build_language_profiles.py` — descarga WALS CLDF (CC BY 4.0) y genera `data/language_profiles.csv`: **1,020 filas, 562 con datos WALS** (familia, género, orden de palabras 81A/82A/83A, adposición, genitivo, adjetivo-sustantivo, síntesis verbal, morfología).
+- `_grammar_notes()` en conversor.py inyecta los rasgos WALS al prompt del traductor → el LLM reestructura al orden real de la lengua.
+- **Bug corregido gracias a WALS:** varios códigos estaban mal etiquetados — `tri` era Tiriyo no Triqui (real: `trc`), `maz` era Mazahua no Mazateco (reales: `maj`,`mzi`), `cab` era Garífuna no Popoloca (real: `pls`), `hui` era Huli no Wixárika (`hch` no tiene checkpoint). Añadidos trs/maj/mzi/pls; hch/tzo/tzh quedan como stubs sin voz (candidatos a entrenar).
+- **Verificado en vivo:** zapoteco ahora traduce limpio ("Bidxi' chii, gucui' ri' xquidxi'.") — el prompt VSO arregló el loop degenerado. Garífuna traduce real. Triqui/Popoloca: Groq se niega honestamente (mejor que alucinar).
+- Panorama GitHub documentado en docs/CUALQUIER_IDIOMA.md (indic-speech-translate, ghana S2S, ttsmms, finetune-hf-vits) — nicho: nadie más hace tipología-en-prompt ni el combo video→audio con rotación gratis.
+- `data/_wals/` gitignored (caché regenerable).
+
+**Pendientes:** descargadores de diccionario/fonemas; Grambank como complemento de rasgos; validación nativa sigue pendiente para TODO.
+
+---
+
 ## 2026-11-22 ~16:30 — Devin (mac-lap)
 
 **Se pidió:** localizar la "super investigación" de entrenar modelos con audio / extender a todos los dialectos del mundo, revisar keys de video_creator (Gemini etc.) y **homologar el pipeline para cualquier idioma**.

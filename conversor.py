@@ -66,36 +66,48 @@ HTTP_UA = ("Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) "
 # OJO: no existe mms-tts-{lengua} genérico para todas — MMS publica por variante
 # (ISO 639-3 / sufijos -dialect_). Tzotzil (tzo) y Tzeltal (tzh) NO tienen
 # checkpoint publicado.
+# NOTA (verif. WALS/ISO 2026-11): corregidos varios códigos mal etiquetados —
+# mms-tts-tri es Tiriyo (Surinam) NO Triqui; el triqui real es trc/trs.
+# mms-tts-maz es Mazahua, no Mazateco (mazatecos reales: maj, mzi).
+# mms-tts-cab es Garífuna, no Popoloca (popoloca real: pls).
+# mms-tts-hui es Huli (Papúa N.G.); Wixárika (hch) NO tiene checkpoint.
 LANGUAGES = {
     # ── lenguas principales ──
-    "nah": {"name": "Náhuatl (Altiplano)",   "mms": "facebook/mms-tts-azz",                        "hint": "náhuatl del Altiplano de Puebla, México central"},
-    "yua": {"name": "Maya Yucateco",         "mms": "facebook/mms-tts-yua",                        "hint": "maya yucateco (maya peninsular)"},
-    "mix": {"name": "Mixteco de Alcozauca",  "mms": "facebook/mms-tts-xta",                        "hint": "mixteco de Alcozauca, Guerrero (Tu'un savi)"},
-    "zap": {"name": "Zapoteco del Istmo",    "mms": "facebook/mms-tts-zai",                        "hint": "zapoteco del Istmo de Tehuantepec, Oaxaca"},
-    "oto": {"name": "Otomí de Querétaro",    "mms": "facebook/mms-tts-otq",                        "hint": "otomí de Querétaro (hñähñu)"},
-    "mam": {"name": "Mam",                   "mms": "facebook/mms-tts-mam-dialect_central",        "hint": "mam central (lengua maya de Chiapas/Guatemala)"},
-    "hus": {"name": "Huasteco / Teenek",     "mms": "facebook/mms-tts-hus-dialect_centralveracruz","hint": "huasteco / teenek de Veracruz"},
-    "maz": {"name": "Mazateco",              "mms": "facebook/mms-tts-maz",                        "hint": "mazateco de Oaxaca"},
-    "tri": {"name": "Triqui de Copala",      "mms": "facebook/mms-tts-tri",                        "hint": "triqui de Copala, Oaxaca"},
-    "cya": {"name": "Chatino de Nopala",     "mms": "facebook/mms-tts-cya",                        "hint": "chatino de Nopala, Oaxaca"},
-    "hui": {"name": "Wixárika / Huichol",    "mms": "facebook/mms-tts-hui",                        "hint": "wixárika / huichol"},
-    "huv": {"name": "Huave / Ikoots",        "mms": "facebook/mms-tts-huv",                        "hint": "huave / ikoots de San Mateo del Mar, Oaxaca"},
-    "tsz": {"name": "Purépecha",             "mms": "facebook/mms-tts-tsz",                        "hint": "purépecha / p'urhépecha de Michoacán"},
-    "toc": {"name": "Totonaco",              "mms": "facebook/mms-tts-toc",                        "hint": "totonaco de la Sierra Norte de Puebla"},
-    "tpp": {"name": "Tepehua",               "mms": "facebook/mms-tts-tpp",                        "hint": "tepehua"},
-    "mfy": {"name": "Mayo / Yoreme",         "mms": "facebook/mms-tts-mfy",                        "hint": "mayo / yoreme de Sonora y Sinaloa"},
-    "cab": {"name": "Popoloca",              "mms": "facebook/mms-tts-cab",                        "hint": "popoloca / ngigua"},
+    "nah": {"name": "Náhuatl de Zacapoaxtla",  "mms": "facebook/mms-tts-azz",                        "hint": "náhuatl de la Sierra Norte de Puebla (Zacapoaxtla)"},
+    "yua": {"name": "Maya Yucateco",           "mms": "facebook/mms-tts-yua",                        "hint": "maya yucateco (maya peninsular)"},
+    "mix": {"name": "Mixteco de Alcozauca",    "mms": "facebook/mms-tts-xta",                        "hint": "mixteco de Alcozauca, Guerrero (Tu'un savi)"},
+    "zap": {"name": "Zapoteco del Istmo",      "mms": "facebook/mms-tts-zai",                        "hint": "zapoteco del Istmo de Tehuantepec, Oaxaca (VSO)"},
+    "oto": {"name": "Otomí de Querétaro",      "mms": "facebook/mms-tts-otq",                        "hint": "otomí de Querétaro (hñähñu)"},
+    "mam": {"name": "Mam",                     "mms": "facebook/mms-tts-mam-dialect_central",        "hint": "mam central (lengua maya VSO de Chiapas/Guatemala)"},
+    "hus": {"name": "Huasteco / Teenek",       "mms": "facebook/mms-tts-hus-dialect_centralveracruz","hint": "huasteco / teenek de Veracruz"},
+    "maz": {"name": "Mazahua",                 "mms": "facebook/mms-tts-maz",                        "hint": "mazahua (jñatjo), Estado de México"},
+    "maz-jal": {"name": "Mazateco de Jalapa de Díaz", "mms": "facebook/mms-tts-maj",                 "hint": "mazateco de Jalapa de Díaz, Oaxaca"},
+    "maz-ixc": {"name": "Mazateco de Ixcatlán",      "mms": "facebook/mms-tts-mzi",                  "hint": "mazateco de Ixcatlán, Oaxaca"},
+    "tri": {"name": "Triqui de Copala",        "mms": "facebook/mms-tts-trc",                        "hint": "triqui de Copala, Oaxaca"},
+    "tri-chi": {"name": "Triqui de Chicahuaxtla","mms": "facebook/mms-tts-trs",                      "hint": "triqui de Chicahuaxtla, Oaxaca"},
+    "cya": {"name": "Chatino de Nopala",       "mms": "facebook/mms-tts-cya",                        "hint": "chatino de Nopala, Oaxaca"},
+    "huv": {"name": "Huave / Ikoots",          "mms": "facebook/mms-tts-huv",                        "hint": "huave / ikoots de San Mateo del Mar, Oaxaca"},
+    "tsz": {"name": "Purépecha",               "mms": "facebook/mms-tts-tsz",                        "hint": "purépecha / p'urhépecha de Michoacán (SVO)"},
+    "toc": {"name": "Totonaco",                "mms": "facebook/mms-tts-toc",                        "hint": "totonaco (Coyutla), Sierra Norte de Puebla/Veracruz"},
+    "tpp": {"name": "Tepehua",                 "mms": "facebook/mms-tts-tpp",                        "hint": "tepehua de Pisaflores, Veracruz"},
+    "mfy": {"name": "Mayo / Yoreme",           "mms": "facebook/mms-tts-mfy",                        "hint": "mayo / yoreme de Sonora y Sinaloa"},
+    "pls": {"name": "Popoloca",                "mms": "facebook/mms-tts-pls",                        "hint": "popoloca de San Marcos Tlacoyalco / ngigua, Puebla"},
+    "cab": {"name": "Garífuna",                "mms": "facebook/mms-tts-cab",                        "hint": "garífuna (Centroamérica: Honduras, Guatemala, Belice)"},
     # ── variantes de náhuatl ──
-    "nah-gro": {"name": "Náhuatl de Guerrero",          "mms": "facebook/mms-tts-ngu", "hint": "náhuatl de Guerrero"},
+    "nah-gro": {"name": "Náhuatl de Guerrero",          "mms": "facebook/mms-tts-ngu", "hint": "náhuatl de Guerrero (Xalitla)"},
     "nah-oax": {"name": "Náhuatl del Norte de Oaxaca",  "mms": "facebook/mms-tts-nhy", "hint": "náhuatl del Norte de Oaxaca"},
     "nah-hua": {"name": "Náhuatl de la Huasteca",       "mms": "facebook/mms-tts-nhe", "hint": "náhuatl de la Huasteca oriental"},
-    "nah-mor": {"name": "Náhuatl de Morelos/Oaxaca",    "mms": "facebook/mms-tts-nch", "hint": "náhuatl de la Huasteca (mms-tts-nch)"},
+    "nah-mor": {"name": "Náhuatl Huasteca Central",     "mms": "facebook/mms-tts-nch", "hint": "náhuatl de la Huasteca central (mms-tts-nch)"},
     "nah-mic": {"name": "Náhuatl de Michoacán",         "mms": "facebook/mms-tts-ncl", "hint": "náhuatl de Michoacán"},
     "nah-tla": {"name": "Náhuatl de Tlamacazapa",       "mms": "facebook/mms-tts-nuz", "hint": "náhuatl de Tlamacazapa, Guerrero"},
     # ── variantes de zapoteco y mixteco frecuentes ──
     "zap-val": {"name": "Zapoteco del Valle",   "mms": "facebook/mms-tts-zab", "hint": "zapoteco del Valle de Oaxaca (Tlacolula)"},
     "zap-sie": {"name": "Zapoteco de la Sierra","mms": "facebook/mms-tts-zaa", "hint": "zapoteco de la Sierra de Juárez"},
     "mix-ata": {"name": "Mixteco de Atatlahuca","mms": "facebook/mms-tts-mib", "hint": "mixteco de Atatlahuca, Oaxaca"},
+    # ── sin checkpoint MMS (solo traducción, sin voz propia) ──
+    "hch": {"name": "Wixárika / Huichol",      "mms": None,                                       "hint": "wixárika / huichol — SIN checkpoint MMS, candidato a entrenar"},
+    "tzo": {"name": "Tzotzil",                 "mms": None,                                       "hint": "tzotzil — SIN checkpoint MMS, candidato a entrenar"},
+    "tzh": {"name": "Tzeltal",                 "mms": None,                                       "hint": "tzeltal — SIN checkpoint MMS, candidato a entrenar"},
     # ── demo ──
     "spa": {"name": "Español (demo)", "mms": None, "hint": "español"},
 }
@@ -275,14 +287,63 @@ def transcribe(audio_path: Path, stt: str = "auto") -> Optional[str]:
         return transcribe_with_whisper(audio_path)
     return None
 
+# ─── PERFILES TIPOLÓGICOS (WALS → prompt) ──────────────────────────────────
+_LANG_PROFILES: Optional[dict] = None
+
+def _lang_profiles() -> dict:
+    """Carga data/language_profiles.csv (generado por tools/build_language_profiles.py)."""
+    global _LANG_PROFILES
+    if _LANG_PROFILES is None:
+        import csv
+        p = Path(__file__).resolve().parent / "data" / "language_profiles.csv"
+        try:
+            _LANG_PROFILES = {r["iso639_3"]: r for r in csv.DictReader(p.open(encoding="utf-8"))}
+        except Exception:
+            _LANG_PROFILES = {}
+    return _LANG_PROFILES
+
+def _profile_for(code: str) -> Optional[dict]:
+    """Devuelve la fila tipológica WALS del código resuelto (vía ISO del checkpoint)."""
+    info = LANGUAGES.get(code) or resolve_language(code) or {}
+    mms = info.get("mms") or ""
+    slug = mms.replace("facebook/mms-tts-", "") if "mms-tts-" in mms else code
+    iso = slug.split("-")[0].split("_")[0]
+    return _lang_profiles().get(iso)
+
+def _grammar_notes(code: str) -> str:
+    """Convierte la fila WALS en notas de estructura para el prompt."""
+    p = _profile_for(code) or {}
+    notes = []
+    if p.get("family"):
+        notes.append(f"- Language family: {p['family']}" + (f" (genus: {p['genus']})" if p.get("genus") else ""))
+    if p.get("word_order") and "No dominant" not in p["word_order"]:
+        notes.append(f"- BASIC WORD ORDER: {p['word_order']} — restructure the sentence to this order; do NOT keep Spanish SVO.")
+    if p.get("subj_verb"):
+        notes.append(f"- Subject–verb: {p['subj_verb']}.")
+    if p.get("obj_verb"):
+        notes.append(f"- Object–verb: {p['obj_verb']}.")
+    if p.get("adposition"):
+        notes.append(f"- Adpositions: {p['adposition']}.")
+    if p.get("genitive"):
+        notes.append(f"- Possession: {p['genitive']}.")
+    if p.get("adj_noun"):
+        notes.append(f"- Adjective–noun order: {p['adj_noun']}.")
+    if p.get("verb_synthesis"):
+        notes.append(f"- Verbs: {p['verb_synthesis']} (mark person/tense on the verb accordingly).")
+    if p.get("affix_position"):
+        notes.append(f"- Morphology: {p['affix_position']} (attach affixes to the correct side of the stem).")
+    if not notes:
+        return ""
+    return "\nGRAMMAR (typology from WALS, wals.info — follow it when composing the sentence):\n" + "\n".join(notes) + "\n"
+
 # ─── STEP 3: TRADUCCIÓN A LENGUA INDÍGENA ──────────────────────────────────
 def _translation_prompt(text: str, lang_code: str) -> str:
     lang_info = LANGUAGES[lang_code]
     return f"""Translate the following text to {lang_info['name']} ({lang_info['hint']}).
-
+{_grammar_notes(lang_code)}
 RULES:
 - Output ONLY the translation, no explanations or notes.
-- Use authentic vocabulary and correct grammar of the language.
+- Use authentic vocabulary and correct grammar of the language — restructure word order to the target language, do not translate word-by-word in Spanish order.
 - If a word has no direct equivalent, use the most common loanword in that language.
 
 Text (Spanish):

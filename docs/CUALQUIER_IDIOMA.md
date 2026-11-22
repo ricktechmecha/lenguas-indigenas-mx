@@ -76,7 +76,39 @@ Ver `docs/ENTRENAMIENTO_MODELOS.md` para la ruta completa. Resumen honesto:
   explícito y compensación.
 - **Prueba 1 antes de batch** (regla de este repo).
 
+## Datos tipológicos ya integrados (2026-11)
+
+`tools/build_language_profiles.py` descarga **WALS CLDF** (CC BY 4.0) y genera
+`data/language_profiles.csv` — una fila por código con: familia, género,
+macroárea, **orden básico de palabras** (81A), sujeto-verbo, objeto-verbo,
+adposiciones, genitivo, adjetivo-sustantivo, síntesis verbal y prefijos/sufijos.
+`conversor.py` inyecta esos rasgos al prompt del traductor (`_grammar_notes`)
+para que el LLM reestructure la oración al orden real de la lengua — esto ya
+corrigió el output degenerado del zapoteco (VSO).
+
+- 1,020 filas · ~560 con datos WALS (cobertura limitada en lenguas de muy bajos
+  recursos — normal, WALS solo documenta lo que tiene gramática descrita).
+- Más rasgos disponibles en el mismo dataset (WALS tiene 192 parámetros);
+  **Grambank** (grambank.clld.org, CC BY) complementa con 195 rasgos binarios.
+- `data/_wals/` es caché regenerable — no se commitea.
+
+## Proyectos similares en GitHub (dónde caemos)
+
+| Proyecto | Pipeline | Cobertura | vs. nosotros |
+|---|---|---|---|
+| `facebook/mms-*` (Meta) | checkpoints TTS/ASR/LID | 1,107 lenguas | Somos capa encima — usamos sus TTS |
+| `jeslinpjames/indic-speech-translate` | Whisper→NLLB→MMS-TTS | Indias | Igual arquitectura; nosotros multi-backend LLM + fallback + tipología en prompt |
+| `theonlyamos/ghana-languages-…` | MMS-LID→ASR→NLLB→XTTS | 4 lenguas Ghana | Ellos usan NLLB fijo; nosotros Groq/Gemini/Ollama con rotación |
+| `wannaphong/ttsmms` | wrapper MMS TTS | 1,107 | Solo TTS, sin traducción ni video |
+| `ylacombe/finetune-hf-vits` | receta fine-tune VITS/MMS | cualquiera | Nuestra ruta de entrenamiento (Fase 4) |
+| **nosotros** | yt-dlp→Whisper/GroqSTT→LLM multi-backend→MMS-TTS | MX curado + 999 ISO | ✅ fallback+rotación, ✅ tipología WALS en prompt, ✅ registry universal, ✅ detector de outputs degenerados |
+
+**Nicho:** nadie más hace (a) inyección de rasgos tipológicos WALS en el
+prompt de traducción ni (b) el combo video-YouTube→audio con rotación gratis
+de backends. Esa es la historia para grants.
+
 ## Estado vs. promesa (para grants)
+
 - ✅ Funciona hoy: ~1,000 lenguas con TTS real vía MMS + traducción
   multi-backend + perfiles extensibles sin tocar código.
 - 🔄 En desarrollo: descargadores de diccionario/fonemas, evaluación
