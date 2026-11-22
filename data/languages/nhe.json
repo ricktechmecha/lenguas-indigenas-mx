@@ -1,0 +1,26 @@
+{
+  "iso639_3": "nhe",
+  "phoneme_inventories": {},
+  "word_order": {},
+  "dictionary_sources": {
+    "wiktextract": "https://kaikki.org/dictionary/nhe/ (JSONL por lengua, CC BY-SA)",
+    "glosbe": "https://glosbe.com/en/nhe (diccionario comunitario)",
+    "nota": "PanLex API caída (2026-11); usar wiktextract o dumps panlex"
+  },
+  "fuentes_licencias": {
+    "phonemes": "PHOIBLE (phoible.org) — CC BY-SA 4.0",
+    "word_order": "WALS v2020.6 + Grambank v1.0.3 — CC BY 4.0"
+  },
+  "validado_por_hablante": false,
+  "_languages_extra_snippet": {
+    "name": "(revisar nombre ISO — nhe)",
+    "mms": "facebook/mms-tts-nhe",
+    "hint": "(escribe la variante exacta para mejorar la traducción)",
+    "iso639_3": "nhe",
+    "fuentes": {
+      "fonemas": "PHOIBLE",
+      "orden": "WALS/Grambank"
+    },
+    "validado_por_hablante": false
+  }
+}

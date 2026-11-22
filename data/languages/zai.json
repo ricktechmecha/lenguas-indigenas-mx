@@ -1,0 +1,84 @@
+{
+  "iso639_3": "zai",
+  "phoneme_inventories": {
+    "Isthmus (Juchitán) Zapotec (Isthmus (Juchitán) Zapotec (ʼzapoteco de la planicie costeraʼ; spoken on the Isthmus of Tehuantepec, Oaxaca, Mexico; typical of the city of Juchitán de Zaragoza))": {
+      "source": "UZ",
+      "counts": {
+        "phonemes": "32",
+        "consonants": "22",
+        "vowels": "7",
+        "tones": "3"
+      },
+      "phonemes": {
+        "consonants": [
+          "j",
+          "k",
+          "k͉",
+          "l",
+          "lː",
+          "m",
+          "n",
+          "nː",
+          "p",
+          "p͉",
+          "r",
+          "s",
+          "s͉",
+          "t",
+          "t̠ʃ",
+          "t̠͉ʃ",
+          "t͉",
+          "w",
+          "ɲ̟",
+          "ɾ",
+          "ʃ",
+          "ʃ͉"
+        ],
+        "vowels": [
+          "e",
+          "i",
+          "iɑ",
+          "ḭu",
+          "o",
+          "u",
+          "ɑ"
+        ],
+        "tones": [
+          "˦",
+          "˧˥",
+          "˨"
+        ]
+      }
+    }
+  },
+  "word_order": {
+    "wals_81a": "VSO",
+    "verb_initial": false,
+    "verb_medial": false,
+    "verb_final": false,
+    "family": "Oto-Manguean",
+    "genus": "Zapotecan",
+    "macroarea": "North America"
+  },
+  "dictionary_sources": {
+    "wiktextract": "https://kaikki.org/dictionary/zai/ (JSONL por lengua, CC BY-SA)",
+    "glosbe": "https://glosbe.com/en/zai (diccionario comunitario)",
+    "nota": "PanLex API caída (2026-11); usar wiktextract o dumps panlex"
+  },
+  "fuentes_licencias": {
+    "phonemes": "PHOIBLE (phoible.org) — CC BY-SA 4.0",
+    "word_order": "WALS v2020.6 + Grambank v1.0.3 — CC BY 4.0"
+  },
+  "validado_por_hablante": false,
+  "_languages_extra_snippet": {
+    "name": "(revisar nombre ISO — zai)",
+    "mms": "facebook/mms-tts-zai",
+    "hint": "(escribe la variante exacta para mejorar la traducción)",
+    "iso639_3": "zai",
+    "fuentes": {
+      "fonemas": "PHOIBLE",
+      "orden": "WALS/Grambank"
+    },
+    "validado_por_hablante": false
+  }
+}

@@ -38,18 +38,30 @@ escribe la variante exacta:
 ### 3. Consigue el diccionario / léxico
 | Fuente | Qué tiene | Licencia |
 |---|---|---|
-| **PanLex** (panlex.org) | Léxico pan-lingüístico, ~5,700 variedades | CC0/datos abiertos |
-| **Wiktionary + wiktextract** | Diccionarios por lengua, con IPA y audio | CC BY-SA 3.0 |
+| **Wiktionary + wiktextract** (kaikki.org) | Diccionarios por lengua, con IPA | CC BY-SA |
 | **Glosbe** | Diccionarios comunitarios + memoria de traducción | variada — verificar |
+| **PanLex** (panlex.org) | Léxico pan-lingüístico — ⚠️ API caída (2026-11), usar dumps | datos abiertos |
 | **StarLing / Tower of Babel** | Léxicos históricos | académica |
 
-### 4. Consigue el inventario de fonemas
-| Fuente | Qué tiene |
-|---|---|
-| **PHOIBLE** (phoible.org) | Inventarios fonémicos de ~2,000 lenguas (IPA) |
-| **eSpeak NG** | Tablas G2P de ~100 lenguas — útil como normalizador |
-| **epitran** (`pip install epitran`) | Grafema→IPA para ~500 lenguas — corre local en la Mac |
-| **WALS** (wals.info) | Rasgos tipológicos para el hint |
+### 4. Consigue el inventario de fonemas — YA IMPLEMENTADO
+```bash
+python3 tools/fetch_language_data.py quz            # pack de una lengua
+python3 tools/fetch_language_data.py --all-curated  # todas las curadas
+```
+Genera `data/languages/<iso>.json` con inventario fonémico real de **PHOIBLE**
+(consonantes/vocales/tonos IPA + fuente), orden de palabras (WALS+Grambank) y
+fuentes de diccionario sugeridas. `epitran` está instalado pero **no cubre
+lenguas MX** — para éstas PHOIBLE es la fuente; en lenguas grandes (ara, jpn…)
+sí sirve de G2P local.
+
+### Evaluar traducciones — YA IMPLEMENTADO
+```bash
+python3 tools/eval_translation.py --lang zap            # Groq + 4 modelos Ollama
+python3 tools/eval_translation.py --lang quz --all      # los ~28 modelos
+```
+Misma frase por cada backend → tabla Markdown con tiempo + detector de salida
+degenerada en `output_audio/eval_<lang>.md`. Es la Fase 1 del plan de
+entrenamiento y la base para la validación por hablante.
 
 ### 5. Si NO hay checkpoint MMS → camino de entrenamiento
 Ver `docs/ENTRENAMIENTO_MODELOS.md` para la ruta completa. Resumen honesto:

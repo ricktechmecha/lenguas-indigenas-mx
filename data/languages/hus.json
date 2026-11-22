@@ -1,0 +1,127 @@
+{
+  "iso639_3": "hus",
+  "phoneme_inventories": {
+    "HUASTECO": {
+      "source": "UPSID",
+      "counts": {
+        "phonemes": "26",
+        "consonants": "21",
+        "vowels": "5",
+        "tones": "0"
+      },
+      "phonemes": {
+        "consonants": [
+          "h",
+          "j̟",
+          "k",
+          "kʷ",
+          "kʷʼ",
+          "kʼ",
+          "l",
+          "m",
+          "n",
+          "p",
+          "t",
+          "ts",
+          "tsʼ",
+          "tʼ",
+          "t̠ʃ",
+          "t̠ʃʼ",
+          "ʃ",
+          "ʔ",
+          "β",
+          "β̞",
+          "θ"
+        ],
+        "vowels": [
+          "a",
+          "e̞",
+          "i",
+          "o̞",
+          "u"
+        ]
+      }
+    },
+    "Huastec (Potosino dialect)": {
+      "source": "PH",
+      "counts": {
+        "phonemes": "36",
+        "consonants": "26",
+        "vowels": "10",
+        "tones": "0"
+      },
+      "phonemes": {
+        "consonants": [
+          "b",
+          "d",
+          "f",
+          "h",
+          "j",
+          "k",
+          "kʷ",
+          "kʷʼ",
+          "kʼ",
+          "l̪",
+          "m",
+          "n̪",
+          "p",
+          "s",
+          "t",
+          "tʼ",
+          "t̠ʃ",
+          "t̠ʃʼ",
+          "t̪",
+          "t̪ʼ",
+          "w",
+          "ɡ",
+          "ɾ̪",
+          "ʃ",
+          "ʔ",
+          "θ"
+        ],
+        "vowels": [
+          "a",
+          "aː",
+          "eː",
+          "i",
+          "iː",
+          "oː",
+          "uː",
+          "ɔ",
+          "ɛ",
+          "ʊ"
+        ]
+      }
+    }
+  },
+  "word_order": {
+    "wals_81a": "SVO",
+    "verb_initial": false,
+    "verb_medial": true,
+    "verb_final": false,
+    "family": "Mayan",
+    "genus": "Mayan",
+    "macroarea": "North America"
+  },
+  "dictionary_sources": {
+    "wiktextract": "https://kaikki.org/dictionary/hus/ (JSONL por lengua, CC BY-SA)",
+    "glosbe": "https://glosbe.com/en/hus (diccionario comunitario)",
+    "nota": "PanLex API caída (2026-11); usar wiktextract o dumps panlex"
+  },
+  "fuentes_licencias": {
+    "phonemes": "PHOIBLE (phoible.org) — CC BY-SA 4.0",
+    "word_order": "WALS v2020.6 + Grambank v1.0.3 — CC BY 4.0"
+  },
+  "validado_por_hablante": false,
+  "_languages_extra_snippet": {
+    "name": "(revisar nombre ISO — hus)",
+    "mms": "facebook/mms-tts-hus",
+    "hint": "(escribe la variante exacta para mejorar la traducción)",
+    "iso639_3": "hus",
+    "fuentes": {
+      "fonemas": "PHOIBLE",
+      "orden": "WALS/Grambank"
+    },
+    "validado_por_hablante": false
+  }
+}

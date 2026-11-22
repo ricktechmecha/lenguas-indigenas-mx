@@ -1,0 +1,75 @@
+{
+  "iso639_3": "ncl",
+  "phoneme_inventories": {
+    "Michoacan Nahual": {
+      "source": "PH",
+      "counts": {
+        "phonemes": "25",
+        "consonants": "20",
+        "vowels": "5",
+        "tones": "0"
+      },
+      "phonemes": {
+        "consonants": [
+          "b",
+          "d",
+          "h",
+          "j",
+          "k",
+          "kʷ",
+          "l",
+          "m",
+          "n",
+          "p",
+          "r",
+          "s",
+          "t",
+          "ts",
+          "t̠ʃ",
+          "w",
+          "ɡ",
+          "ɲ",
+          "ʃ",
+          "ʔ"
+        ],
+        "vowels": [
+          "a",
+          "e",
+          "i",
+          "o",
+          "u"
+        ]
+      }
+    }
+  },
+  "word_order": {
+    "wals_81a": "SVO",
+    "verb_initial": true,
+    "verb_medial": true,
+    "verb_final": false,
+    "family": "Uto-Aztecan",
+    "genus": "Aztecan",
+    "macroarea": "North America"
+  },
+  "dictionary_sources": {
+    "wiktextract": "https://kaikki.org/dictionary/ncl/ (JSONL por lengua, CC BY-SA)",
+    "glosbe": "https://glosbe.com/en/ncl (diccionario comunitario)",
+    "nota": "PanLex API caída (2026-11); usar wiktextract o dumps panlex"
+  },
+  "fuentes_licencias": {
+    "phonemes": "PHOIBLE (phoible.org) — CC BY-SA 4.0",
+    "word_order": "WALS v2020.6 + Grambank v1.0.3 — CC BY 4.0"
+  },
+  "validado_por_hablante": false,
+  "_languages_extra_snippet": {
+    "name": "(revisar nombre ISO — ncl)",
+    "mms": "facebook/mms-tts-ncl",
+    "hint": "(escribe la variante exacta para mejorar la traducción)",
+    "iso639_3": "ncl",
+    "fuentes": {
+      "fonemas": "PHOIBLE",
+      "orden": "WALS/Grambank"
+    },
+    "validado_por_hablante": false
+  }
+}

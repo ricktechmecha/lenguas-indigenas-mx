@@ -4,6 +4,21 @@
 
 ---
 
+## 2026-11-22 ~19:00 — Devin (mac-lap)
+
+**Se pidió:** "haz todos los pendientes" — downloader de diccionarios/fonemas, Grambank, harness de evaluación.
+
+**Hecho:**
+- `tools/fetch_language_data.py` — descarga PHOIBLE (inventarios fonémicos IPA reales por lengua, CC BY-SA) + WALS/Grambank fusionado → genera `data/languages/<iso>.json` (pack: fonemas consonantes/vocales/tonos, orden de palabras, fuentes de diccionario, licencias, snippet para languages_extra.json). Corrido `--all-curated`: 30 packs generados; PHOIBLE cubre hus/huv/mam/maz/ncl/tsz/yua/zab/zai (huecos en el resto = documentación fonológica escasa, honesto).
+- `tools/eval_translation.py` — benchmark: misma frase por Groq + modelos Ollama locales → `output_audio/eval_<lang>.md` (tiempo + detector degenerado). Filtra embeddings/vision/OCR y por default solo modelos ≤4B (CPU Intel). `--all` corre los ~28.
+- epitran instalado pero NO cubre lenguas MX (solo fonemas PHOIBLE ahí; epitran sirve para lenguas grandes tipo ara/jpn).
+- PanLex API caída → documentado; diccionarios apuntan a wiktextract/Glosbe.
+- Cachés `data/_phoible`, `data/_grambank` gitignored; los packs `data/languages/*.json` sí se commitean.
+
+**Pendientes:** Grambank completo (51MB) como fuente extra de rasgos; benchmark completo --all (lento en CPU); validación nativa.
+
+---
+
 ## 2026-11-22 ~17:30 — Devin (mac-lap)
 
 **Se pidió:** inyectar estructura gramatical por lengua al prompt de traducción ("excel" mínimo-completo de rasgos), re-revisar proyectos similares en GitHub, empezar con nuestras lenguas pero extensible (India, etc.).

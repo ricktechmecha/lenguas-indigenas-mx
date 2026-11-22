@@ -1,0 +1,118 @@
+{
+  "iso639_3": "huv",
+  "phoneme_inventories": {
+    "HUAVE": {
+      "source": "UPSID",
+      "counts": {
+        "phonemes": "29",
+        "consonants": "23",
+        "vowels": "6",
+        "tones": "0"
+      },
+      "phonemes": {
+        "consonants": [
+          "b",
+          "d̪|d",
+          "h",
+          "j",
+          "k",
+          "kʷ",
+          "l̪|l",
+          "m",
+          "mb",
+          "n̪d̪|nd",
+          "n̪|n",
+          "p",
+          "r̪|r",
+          "s̪|s",
+          "t̪s̪|ts",
+          "t̪|t",
+          "w",
+          "z̪͇|z͇",
+          "ŋɡ",
+          "ŋɡʷ",
+          "ɣ",
+          "ɸ",
+          "ɾ̪|ɾ"
+        ],
+        "vowels": [
+          "a",
+          "e̞",
+          "i",
+          "o̞",
+          "u",
+          "ɯ"
+        ]
+      }
+    },
+    "Huave, San Mateo del Mar": {
+      "source": "PH",
+      "counts": {
+        "phonemes": "24",
+        "consonants": "18",
+        "vowels": "6",
+        "tones": "0"
+      },
+      "phonemes": {
+        "consonants": [
+          "b",
+          "d",
+          "h",
+          "j",
+          "k",
+          "l",
+          "m",
+          "n",
+          "p",
+          "r",
+          "s",
+          "t",
+          "ts",
+          "t̠ʃ",
+          "w",
+          "ɡ",
+          "ɾ",
+          "ʃ"
+        ],
+        "vowels": [
+          "a",
+          "e",
+          "i",
+          "o",
+          "u",
+          "ɨ"
+        ]
+      }
+    }
+  },
+  "word_order": {
+    "wals_81a": "SVO",
+    "verb_initial": false,
+    "verb_medial": false,
+    "verb_final": false,
+    "family": "Huavean",
+    "genus": "Huavean",
+    "macroarea": "North America"
+  },
+  "dictionary_sources": {
+    "wiktextract": "https://kaikki.org/dictionary/huv/ (JSONL por lengua, CC BY-SA)",
+    "glosbe": "https://glosbe.com/en/huv (diccionario comunitario)",
+    "nota": "PanLex API caída (2026-11); usar wiktextract o dumps panlex"
+  },
+  "fuentes_licencias": {
+    "phonemes": "PHOIBLE (phoible.org) — CC BY-SA 4.0",
+    "word_order": "WALS v2020.6 + Grambank v1.0.3 — CC BY 4.0"
+  },
+  "validado_por_hablante": false,
+  "_languages_extra_snippet": {
+    "name": "(revisar nombre ISO — huv)",
+    "mms": "facebook/mms-tts-huv",
+    "hint": "(escribe la variante exacta para mejorar la traducción)",
+    "iso639_3": "huv",
+    "fuentes": {
+      "fonemas": "PHOIBLE",
+      "orden": "WALS/Grambank"
+    },
+    "validado_por_hablante": false
+  }
+}

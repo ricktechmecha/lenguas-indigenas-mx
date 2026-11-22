@@ -1,0 +1,136 @@
+{
+  "iso639_3": "tsz",
+  "phoneme_inventories": {
+    "Tarascan": {
+      "source": "SPA",
+      "counts": {
+        "phonemes": "32",
+        "consonants": "26",
+        "vowels": "6",
+        "tones": "0"
+      },
+      "phonemes": {
+        "consonants": [
+          "b",
+          "d",
+          "f",
+          "h",
+          "j",
+          "kʰ",
+          "k͉",
+          "l",
+          "m",
+          "n",
+          "pʰ",
+          "p͉",
+          "s",
+          "tsʰ",
+          "tʰ",
+          "t̠ʃʰ",
+          "t̠ʃ͉",
+          "t͉",
+          "t͉s",
+          "w",
+          "x",
+          "ɡ",
+          "ɭ",
+          "ɲ",
+          "ʃ",
+          "ʔ"
+        ],
+        "vowels": [
+          "a",
+          "i",
+          "o",
+          "u",
+          "ɛ",
+          "ɨ˞"
+        ]
+      }
+    },
+    "TARASCAN": {
+      "source": "UPSID",
+      "counts": {
+        "phonemes": "39",
+        "consonants": "33",
+        "vowels": "6",
+        "tones": "0"
+      },
+      "phonemes": {
+        "consonants": [
+          "b",
+          "d",
+          "f",
+          "h",
+          "j",
+          "k",
+          "kʰ",
+          "kʷ",
+          "kʷʰ",
+          "l̪|l",
+          "m",
+          "n̪|n",
+          "p",
+          "pʰ",
+          "r",
+          "s̪|s",
+          "t",
+          "ts",
+          "tsʰ",
+          "tʰ",
+          "t̠ʃ",
+          "t̠ʃʰ",
+          "w",
+          "x",
+          "ŋ",
+          "ɡ",
+          "ɭ",
+          "ɲ",
+          "ɸ",
+          "ɹ",
+          "ʂ",
+          "ʃ",
+          "ʔ"
+        ],
+        "vowels": [
+          "a",
+          "i",
+          "o",
+          "u",
+          "ɛ",
+          "ɨ˞"
+        ]
+      }
+    }
+  },
+  "word_order": {
+    "wals_81a": "SVO",
+    "verb_initial": false,
+    "verb_medial": false,
+    "verb_final": true,
+    "family": "Tarascan",
+    "genus": "Tarascan",
+    "macroarea": "North America"
+  },
+  "dictionary_sources": {
+    "wiktextract": "https://kaikki.org/dictionary/tsz/ (JSONL por lengua, CC BY-SA)",
+    "glosbe": "https://glosbe.com/en/tsz (diccionario comunitario)",
+    "nota": "PanLex API caída (2026-11); usar wiktextract o dumps panlex"
+  },
+  "fuentes_licencias": {
+    "phonemes": "PHOIBLE (phoible.org) — CC BY-SA 4.0",
+    "word_order": "WALS v2020.6 + Grambank v1.0.3 — CC BY 4.0"
+  },
+  "validado_por_hablante": false,
+  "_languages_extra_snippet": {
+    "name": "(revisar nombre ISO — tsz)",
+    "mms": "facebook/mms-tts-tsz",
+    "hint": "(escribe la variante exacta para mejorar la traducción)",
+    "iso639_3": "tsz",
+    "fuentes": {
+      "fonemas": "PHOIBLE",
+      "orden": "WALS/Grambank"
+    },
+    "validado_por_hablante": false
+  }
+}

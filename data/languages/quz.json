@@ -1,0 +1,73 @@
+{
+  "iso639_3": "quz",
+  "phoneme_inventories": {
+    "Cuzco-Collao Quechua": {
+      "source": "SAPHON",
+      "counts": {
+        "phonemes": "31",
+        "consonants": "26",
+        "vowels": "5",
+        "tones": "0"
+      },
+      "phonemes": {
+        "consonants": [
+          "h",
+          "j",
+          "k",
+          "kʰ",
+          "kʼ",
+          "l",
+          "m",
+          "n",
+          "p",
+          "pʰ",
+          "pʼ",
+          "q",
+          "qʰ",
+          "qʼ",
+          "s",
+          "t",
+          "tʰ",
+          "tʼ",
+          "t̠ʃ",
+          "t̠ʃʰ",
+          "t̠ʃʼ",
+          "w",
+          "ɲ",
+          "ɾ",
+          "ʃ",
+          "ʎ"
+        ],
+        "vowels": [
+          "a",
+          "e",
+          "i",
+          "o",
+          "u"
+        ]
+      }
+    }
+  },
+  "word_order": {},
+  "dictionary_sources": {
+    "wiktextract": "https://kaikki.org/dictionary/quz/ (JSONL por lengua, CC BY-SA)",
+    "glosbe": "https://glosbe.com/en/quz (diccionario comunitario)",
+    "nota": "PanLex API caída (2026-11); usar wiktextract o dumps panlex"
+  },
+  "fuentes_licencias": {
+    "phonemes": "PHOIBLE (phoible.org) — CC BY-SA 4.0",
+    "word_order": "WALS v2020.6 + Grambank v1.0.3 — CC BY 4.0"
+  },
+  "validado_por_hablante": false,
+  "_languages_extra_snippet": {
+    "name": "(revisar nombre ISO — quz)",
+    "mms": "facebook/mms-tts-quz",
+    "hint": "(escribe la variante exacta para mejorar la traducción)",
+    "iso639_3": "quz",
+    "fuentes": {
+      "fonemas": "PHOIBLE",
+      "orden": "WALS/Grambank"
+    },
+    "validado_por_hablante": false
+  }
+}

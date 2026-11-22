@@ -1,0 +1,182 @@
+{
+  "iso639_3": "maz",
+  "phoneme_inventories": {
+    "Mazahua": {
+      "source": "SPA",
+      "counts": {
+        "phonemes": "63",
+        "consonants": "45",
+        "vowels": "15",
+        "tones": "3"
+      },
+      "phonemes": {
+        "consonants": [
+          "h",
+          "j",
+          "j̥",
+          "k",
+          "kʰ",
+          "kʷ",
+          "kʷʰ",
+          "kʷʼ",
+          "kʼ",
+          "l",
+          "m",
+          "m̥",
+          "n",
+          "n̥",
+          "p",
+          "pʰ",
+          "r",
+          "s",
+          "sʰ",
+          "sʼ",
+          "t",
+          "ts",
+          "tsʰ",
+          "tsʼ",
+          "tʰ",
+          "tʼ",
+          "t̠ʃ",
+          "t̠ʃʰ",
+          "t̠ʃʼ",
+          "w",
+          "z",
+          "ɓ",
+          "ɗ",
+          "ɡ",
+          "ɡʷ",
+          "ɲ",
+          "ɲ̥",
+          "ʃ",
+          "ʍ",
+          "ʒ",
+          "ʔ",
+          "ˀj",
+          "ˀm",
+          "ˀw",
+          "ˀɲ"
+        ],
+        "vowels": [
+          "a",
+          "ã",
+          "e",
+          "ẽ",
+          "i",
+          "ĩ",
+          "o",
+          "õ",
+          "u",
+          "ũ",
+          "ɔ",
+          "ə",
+          "ə̃",
+          "ɛ",
+          "ʌ"
+        ],
+        "tones": [
+          "˥",
+          "˥˦",
+          "˩"
+        ]
+      }
+    },
+    "MAZAHUA": {
+      "source": "UPSID",
+      "counts": {
+        "phonemes": "60",
+        "consonants": "45",
+        "vowels": "15",
+        "tones": "0"
+      },
+      "phonemes": {
+        "consonants": [
+          "R̪|R",
+          "h",
+          "j",
+          "j̥",
+          "j̰",
+          "k",
+          "kʰ",
+          "kʷ",
+          "kʷʰ",
+          "kʷʼ",
+          "kʼ",
+          "l̪|l",
+          "m",
+          "m̥",
+          "m̰",
+          "n̪|n",
+          "n̪̥|n̥",
+          "p",
+          "pʰ",
+          "s̪|s",
+          "s̪ʰ|sʰ",
+          "s̪ʼ|sʼ",
+          "t̠ʃ",
+          "t̠ʃʰ",
+          "t̠ʃʼ",
+          "t̪s̪|ts",
+          "t̪s̪ʰ|tsʰ",
+          "t̪s̪ʼ|tsʼ",
+          "t̪|t",
+          "t̪ʰ|tʰ",
+          "t̪ʼ|tʼ",
+          "w",
+          "w̰",
+          "z̪|z",
+          "ɓ",
+          "ɗ̪|ɗ",
+          "ɡ",
+          "ɡʷ",
+          "ɲ",
+          "ɲ̥",
+          "ɲ̰",
+          "ʃ",
+          "ʍ",
+          "ʒ",
+          "ʔ"
+        ],
+        "vowels": [
+          "a",
+          "ã",
+          "e",
+          "ẽ",
+          "i",
+          "ĩ",
+          "o",
+          "õ",
+          "u",
+          "ũ",
+          "ɐ",
+          "ɔ",
+          "ə",
+          "ə̃",
+          "ɛ"
+        ]
+      }
+    }
+  },
+  "word_order": {},
+  "dictionary_sources": {
+    "wiktextract": "https://kaikki.org/dictionary/maz/ (JSONL por lengua, CC BY-SA)",
+    "glosbe": "https://glosbe.com/en/maz (diccionario comunitario)",
+    "nota": "PanLex API caída (2026-11); usar wiktextract o dumps panlex"
+  },
+  "fuentes_licencias": {
+    "phonemes": "PHOIBLE (phoible.org) — CC BY-SA 4.0",
+    "word_order": "WALS v2020.6 + Grambank v1.0.3 — CC BY 4.0"
+  },
+  "validado_por_hablante": false,
+  "_languages_extra_snippet": {
+    "name": "(revisar nombre ISO — maz)",
+    "mms": "facebook/mms-tts-maz",
+    "hint": "(escribe la variante exacta para mejorar la traducción)",
+    "iso639_3": "maz",
+    "fuentes": {
+      "fonemas": "PHOIBLE",
+      "orden": "WALS/Grambank"
+    },
+    "validado_por_hablante": false
+  }
+}

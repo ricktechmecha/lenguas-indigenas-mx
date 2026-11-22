@@ -70,6 +70,15 @@ to the target language instead of translating word-by-word in Spanish order.
 Rebuild the table with `python3 tools/build_language_profiles.py` →
 `data/language_profiles.csv` (1,000+ languages, Excel-openable).
 
+**Language data tools** (`tools/`):
+
+```bash
+python3 tools/build_language_profiles.py        # WALS → language_profiles.csv
+python3 tools/fetch_language_data.py quz        # phonemes (PHOIBLE) + pack JSON
+python3 tools/fetch_language_data.py --all-curated
+python3 tools/eval_translation.py --lang zap    # benchmark Groq vs Ollama models
+```
+
 Mexico has 68 linguistic groupings and 364 variants (INALI). Mapping the
 remaining INALI variants to their closest MMS checkpoint is on the roadmap.
 

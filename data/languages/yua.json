@@ -1,0 +1,72 @@
+{
+  "iso639_3": "yua",
+  "phoneme_inventories": {
+    "YUCATEC": {
+      "source": "UPSID",
+      "counts": {
+        "phonemes": "30",
+        "consonants": "20",
+        "vowels": "10",
+        "tones": "0"
+      },
+      "phonemes": {
+        "consonants": [
+          "b̰",
+          "h",
+          "j",
+          "k",
+          "kʼ",
+          "l",
+          "m",
+          "n̪|n",
+          "p",
+          "pʼ",
+          "s",
+          "ts",
+          "tsʼ",
+          "t̠ʃ",
+          "t̠ʃʼ",
+          "t̪|t",
+          "t̪ʼ|tʼ",
+          "w",
+          "ʃ",
+          "ʔ"
+        ],
+        "vowels": [
+          "a",
+          "a̰",
+          "e̞",
+          "i",
+          "ḭ",
+          "o̞",
+          "u",
+          "ṵ",
+          "ɔ̰",
+          "ɛ̰"
+        ]
+      }
+    }
+  },
+  "word_order": {},
+  "dictionary_sources": {
+    "wiktextract": "https://kaikki.org/dictionary/yua/ (JSONL por lengua, CC BY-SA)",
+    "glosbe": "https://glosbe.com/en/yua (diccionario comunitario)",
+    "nota": "PanLex API caída (2026-11); usar wiktextract o dumps panlex"
+  },
+  "fuentes_licencias": {
+    "phonemes": "PHOIBLE (phoible.org) — CC BY-SA 4.0",
+    "word_order": "WALS v2020.6 + Grambank v1.0.3 — CC BY 4.0"
+  },
+  "validado_por_hablante": false,
+  "_languages_extra_snippet": {
+    "name": "(revisar nombre ISO — yua)",
+    "mms": "facebook/mms-tts-yua",
+    "hint": "(escribe la variante exacta para mejorar la traducción)",
+    "iso639_3": "yua",
+    "fuentes": {
+      "fonemas": "PHOIBLE",
+      "orden": "WALS/Grambank"
+    },
+    "validado_por_hablante": false
+  }
+}

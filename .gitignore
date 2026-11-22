@@ -25,3 +25,6 @@ _toolkit/
 
 # caché WALS regenerable (tools/build_language_profiles.py)
 data/_wals/
+# cachés regenerables de datos lingüísticos
+data/_phoible/
+data/_grambank/

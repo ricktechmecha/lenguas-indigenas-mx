@@ -1,0 +1,89 @@
+{
+  "iso639_3": "zab",
+  "phoneme_inventories": {
+    "Tlacolula Valley Zapotec; Western Tlacolula Zapotec; Zapotec, San Juan Guelavía": {
+      "source": "PH",
+      "counts": {
+        "phonemes": "47",
+        "consonants": "29",
+        "vowels": "18",
+        "tones": "0"
+      },
+      "phonemes": {
+        "consonants": [
+          "b",
+          "d",
+          "d̠ʒ",
+          "f",
+          "h",
+          "j",
+          "k",
+          "l",
+          "lː",
+          "m",
+          "mː",
+          "n",
+          "nː",
+          "p",
+          "r",
+          "s",
+          "t",
+          "ts",
+          "t̠ʃ",
+          "w",
+          "z",
+          "ŋ",
+          "ŋː",
+          "ɡ",
+          "ɾ",
+          "ʂ",
+          "ʃ",
+          "ʐ",
+          "ʒ"
+        ],
+        "vowels": [
+          "a",
+          "a̤",
+          "a̰",
+          "e",
+          "e̤",
+          "ḛ",
+          "i",
+          "i̤",
+          "ḭ",
+          "o",
+          "o̤",
+          "o̰",
+          "u",
+          "ṳ",
+          "ṵ",
+          "ɯ",
+          "ɯ̤",
+          "ɯ̰"
+        ]
+      }
+    }
+  },
+  "word_order": {},
+  "dictionary_sources": {
+    "wiktextract": "https://kaikki.org/dictionary/zab/ (JSONL por lengua, CC BY-SA)",
+    "glosbe": "https://glosbe.com/en/zab (diccionario comunitario)",
+    "nota": "PanLex API caída (2026-11); usar wiktextract o dumps panlex"
+  },
+  "fuentes_licencias": {
+    "phonemes": "PHOIBLE (phoible.org) — CC BY-SA 4.0",
+    "word_order": "WALS v2020.6 + Grambank v1.0.3 — CC BY 4.0"
+  },
+  "validado_por_hablante": false,
+  "_languages_extra_snippet": {
+    "name": "(revisar nombre ISO — zab)",
+    "mms": "facebook/mms-tts-zab",
+    "hint": "(escribe la variante exacta para mejorar la traducción)",
+    "iso639_3": "zab",
+    "fuentes": {
+      "fonemas": "PHOIBLE",
+      "orden": "WALS/Grambank"
+    },
+    "validado_por_hablante": false
+  }
+}
