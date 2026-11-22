@@ -2,7 +2,7 @@
 
 **Convert text or YouTube videos into spoken audio in Mexican indigenous languages.**
 
-An accessibility-focused pipeline that takes Spanish content (plain text or a YouTube URL) and produces a `.wav` narration in one of 8 indigenous languages of Mexico — orchestrating existing open models rather than training new ones.
+An accessibility-focused pipeline that takes Spanish content (plain text or a YouTube URL) and produces a `.wav` narration in one of **17 indigenous languages of Mexico** — orchestrating existing open models rather than training new ones.
 
 ```
 Text / YouTube URL
@@ -23,18 +23,38 @@ Text / YouTube URL
 
 ## Supported languages
 
+MMS-TTS publishes checkpoints per **variant** (ISO 639-3), not per language —
+each code below maps to a checkpoint verified to exist on Hugging Face
+(verified 2026-11-22). Tzotzil and Tzeltal have **no published checkpoint**.
+
 | Code | Language | Approx. speakers | MMS-TTS model |
 |------|----------|------------------|----------------|
-| `nah` | Náhuatl | 1.7 M | `facebook/mms-tts-nah` |
+| `nah` | Náhuatl (Altiplano) | 1.7 M (all variants) | `facebook/mms-tts-azz` |
 | `yua` | Maya Yucateco | 800 K | `facebook/mms-tts-yua` |
-| `mix` | Mixteco (Tu'un savi) | 500 K | `facebook/mms-tts-mix` |
-| `zap` | Zapoteco | 400 K | `facebook/mms-tts-zap` |
-| `oto` | Otomí / Hñähñu | 300 K | `facebook/mms-tts-oto` |
-| `tzo` | Tzotzil | 400 K | `facebook/mms-tts-tzo` |
-| `tzh` | Tzeltal | 500 K | `facebook/mms-tts-tzh` |
-| `mam` | Mam | 600 K | `facebook/mms-tts-mam` |
+| `mix` | Mixteco de Alcozauca | 500 K (all variants) | `facebook/mms-tts-xta` |
+| `zap` | Zapoteco del Istmo | 400 K (all variants) | `facebook/mms-tts-zai` |
+| `oto` | Otomí de Querétaro | 300 K | `facebook/mms-tts-otq` |
+| `mam` | Mam | 600 K | `facebook/mms-tts-mam-dialect_central` |
+| `hus` | Huasteco / Teenek | 200 K | `facebook/mms-tts-hus-dialect_centralveracruz` |
+| `maz` | Mazateco | 200 K | `facebook/mms-tts-maz` |
+| `tri` | Triqui de Copala | 30 K | `facebook/mms-tts-tri` |
+| `cya` | Chatino de Nopala | 45 K | `facebook/mms-tts-cya` |
+| `hui` | Wixárika / Huichol | 50 K | `facebook/mms-tts-hui` |
+| `huv` | Huave / Ikoots | 20 K | `facebook/mms-tts-huv` |
+| `tsz` | Purépecha | 140 K | `facebook/mms-tts-tsz` |
+| `toc` | Totonaco | 240 K | `facebook/mms-tts-toc` |
+| `tpp` | Tepehua | 10 K | `facebook/mms-tts-tpp` |
+| `mfy` | Mayo / Yoreme | 40 K | `facebook/mms-tts-mfy` |
+| `cab` | Popoloca / Ngigua | 60 K | `facebook/mms-tts-cab` |
 
-Mexico has 68 linguistic groupings and 364 variants (INALI). MMS-TTS also ships checkpoints for specific regional variants (e.g. Náhuatl de Guerrero `ngu`, Náhuatl del Norte de Oaxaca `nhy`, Náhuatl de la Huasteca `nch`) — mapping INALI variants to their closest MMS checkpoint is on the roadmap.
+**Variant checkpoints** also wired: Náhuatl de Guerrero (`nah-gro`), Norte de
+Oaxaca (`nah-oax`), Huasteca (`nah-hua`), Morelos (`nah-mor`), Michoacán
+(`nah-mic`), Tlamacazapa (`nah-tla`); Zapoteco del Valle (`zap-val`) y de la
+Sierra (`zap-sie`); Mixteco de Atatlahuca (`mix-ata`). Run `--list-langs` for
+the full table.
+
+Mexico has 68 linguistic groupings and 364 variants (INALI). Mapping the
+remaining INALI variants to their closest MMS checkpoint is on the roadmap.
 
 ## Install
 

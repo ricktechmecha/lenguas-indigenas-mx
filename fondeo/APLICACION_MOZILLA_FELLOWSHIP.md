@@ -18,7 +18,7 @@ Portal: mozillafoundation.org → Fellowships → Apply
 
 **Bio (EN, ~100 palabras):**
 
-> Independent developer from Mexico City building open-source infrastructure for linguistic equity. I built Lenguas Indígenas MX, a working pipeline that converts any text or YouTube video into spoken audio in 8 Mexican indigenous languages — náhuatl, maya yucateco, mixteco, zapoteco, otomí, tzotzil, tzeltal and mam — by orchestrating Whisper ASR, LLM translation (Gemini and local Llama) and Meta's MMS-TTS. My work sits at the intersection of AI, accessibility, and indigenous data sovereignty: the next phase is a community-governed open speech corpus recorded and validated by native speakers themselves.
+> Independent developer from Mexico City building open-source infrastructure for linguistic equity. I built Lenguas Indígenas MX, a working pipeline that converts any text or YouTube video into spoken audio in 17 Mexican indigenous languages — náhuatl, maya yucateco, mixteco, zapoteco, otomí, mam, huasteco, mazateco, triqui, chatino, wixárika, huave, purépecha, totonaco, tepehua, mayo and popoloca — by orchestrating Whisper ASR, LLM translation (multi-backend: Groq, Gemini, local Llama) and Meta's MMS-TTS. My work sits at the intersection of AI, accessibility, and indigenous data sovereignty: the next phase is a community-governed open speech corpus recorded and validated by native speakers themselves.
 
 ---
 

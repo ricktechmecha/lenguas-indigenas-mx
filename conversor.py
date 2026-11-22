@@ -316,14 +316,31 @@ def translate_with_cerebras(text: str, lang_code: str) -> Optional[str]:
         print(f"  ✅ Traducido (Cerebras {CEREBRAS_MODEL}): {t[:80]}...")
     return t
 
+def _ollama_local_model() -> Optional[str]:
+    """Devuelve LLAMA_MODEL si está instalado, o el primer modelo llama* local."""
+    try:
+        req = urllib.request.Request(f"{OLLAMA_HOST}/api/tags")
+        with urllib.request.urlopen(req, timeout=5) as r:
+            models = [m["name"] for m in json.loads(r.read()).get("models", [])]
+        if LLAMA_MODEL in models:
+            return LLAMA_MODEL
+        llamas = [m for m in models if "llama" in m.lower()]
+        pick = (llamas or models or [None])[0]
+        if pick and pick != LLAMA_MODEL:
+            print(f"  ⚠️  {LLAMA_MODEL} no instalado — usando {pick}")
+        return pick
+    except Exception:
+        return LLAMA_MODEL  # sin servicio; el caller reporta el error
+
 def translate_with_llama(text: str, lang_code: str, retries: int = 2) -> Optional[str]:
     """Traduce con Llama local vía Ollama (sin API key, sin costo, sin nube).
-    Requiere: `ollama serve` corriendo y el modelo descargado (`ollama pull llama3.1:8b`)."""
+    Requiere: `ollama serve` corriendo y un modelo llama descargado."""
     lang_name = LANGUAGES[lang_code]["name"]
     prompt    = _translation_prompt(text, lang_code)
+    model     = _ollama_local_model()
 
     payload = {
-        "model": LLAMA_MODEL,
+        "model": model,
         "messages": [{"role": "user", "content": prompt}],
         "stream": False,
         "options": {"temperature": 0.3},
@@ -351,6 +368,19 @@ def translate_with_llama(text: str, lang_code: str, retries: int = 2) -> Optiona
             return None
     return None
 
+def _looks_degenerate(src: str, out: str) -> bool:
+    """Detecta traducciones alucinadas: loops de tokens o salida desproporcionada.
+    Común en lenguas de bajos recursos — mejor fallar que sintetizar basura."""
+    if len(out) > max(2000, len(src) * 8):
+        return True
+    toks = out.split()
+    if len(toks) >= 20:
+        from collections import Counter
+        top = Counter(toks).most_common(1)[0][1]
+        if top / len(toks) > 0.25:
+            return True
+    return False
+
 # Orden 'auto': gratis primero (Groq), luego Gemini (si hay key), nubes de pago, local al final.
 TRANSLATORS = {
     "groq":         (translate_with_groq,         GROQ_KEYS,     "GROQ_API_KEY"),
@@ -372,7 +402,11 @@ def translate(text: str, lang_code: str, translator: str = "auto") -> Optional[s
             continue
         t = fn(text, lang_code)
         if t:
-            return t
+            if _looks_degenerate(text, t):
+                print(f"  ⚠️  {name} produjo salida degenerada (loop/alucinación) — descartada")
+                t = None
+            else:
+                return t
         if translator != "auto":
             return None
         print(f"  🔄 {name} falló — probando siguiente motor...")

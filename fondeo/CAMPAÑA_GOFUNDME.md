@@ -42,7 +42,7 @@ El donante NO entiende "pipeline de orquestación de modelos". SÍ entiende:
 >
 > ### Construí la tecnología — falta la voz
 >
-> Soy desarrollador independiente en CDMX. Construí y publiqué (código abierto, gratis) una herramienta que convierte cualquier texto o video de YouTube en audio hablado en **8 lenguas indígenas mexicanas**: náhuatl, maya yucateco, mixteco, zapoteco, otomí, tzotzil, tzeltal y mam. Funciona hoy, en una computadora normal, sin pagarle a ninguna empresa de Silicon Valley.
+> Soy desarrollador independiente en CDMX. Construí y publiqué (código abierto, gratis) una herramienta que convierte cualquier texto o video de YouTube en audio hablado en **17 lenguas indígenas mexicanas**: náhuatl, maya yucateco, mixteco, zapoteco, otomí, mam, huasteco, mazateco, triqui, chatino, wixárika, huave, purépecha, totonaco, tepehua, mayo y popoloca. Funciona hoy, en una computadora normal, sin pagarle a ninguna empresa de Silicon Valley.
 >
 > **👉 [VIDEO: escúchala funcionando]**
 >
@@ -65,11 +65,11 @@ El donante NO entiende "pipeline de orquestación de modelos". SÍ entiende:
 
 ## ✍️ SHORT VERSION (para compartir en redes)
 
-> El internet le habla a 7 millones de mexicanos en un idioma que no es el suyo. Construí una herramienta gratis que convierte videos y textos a audio en 8 lenguas indígenas. Ahora necesito grabar hablantes nativos en Yucatán para crear la primera biblioteca de voz abierta en maya. Cada peso paga a hablantes. 🌿 [LINK]
+> El internet le habla a 7 millones de mexicanos en un idioma que no es el suyo. Construí una herramienta gratis que convierte videos y textos a audio en 17 lenguas indígenas. Ahora necesito grabar hablantes nativos en Yucatán para crear la primera biblioteca de voz abierta en maya. Cada peso paga a hablantes. 🌿 [LINK]
 
 ## ✍️ ENGLISH VERSION (short, para GoFundMe internacional)
 
-> 7 million Mexicans speak an indigenous language — and the internet barely speaks back. I built a free, open-source tool that turns any text or YouTube video into spoken audio in 8 Mexican indigenous languages. Now I need to record native speakers in Yucatán to create the first community-governed open voice corpus in Maya. Every dollar pays the speakers themselves. 🌿 [LINK]
+> 7 million Mexicans speak an indigenous language — and the internet barely speaks back. I built a free, open-source tool that turns any text or YouTube video into spoken audio in 17 Mexican indigenous languages. Now I need to record native speakers in Yucatán to create the first community-governed open voice corpus in Maya. Every dollar pays the speakers themselves. 🌿 [LINK]
 
 ---
 
@@ -78,7 +78,7 @@ El donante NO entiende "pipeline de orquestación de modelos". SÍ entiende:
 | Tiempo | Pantalla | Voz en off (grábalo tú) |
 |---|---|---|
 | 0-5s | Texto grande: "7 millones de mexicanos no pueden escuchar el internet" | "Imagina que el internet nunca aprendió tu idioma." |
-| 5-15s | Terminal corriendo `conversor.py --list-langs` (zoom a la tabla) | "Construí una herramienta gratuita que habla 8 lenguas indígenas mexicanas." |
+| 5-15s | Terminal corriendo `conversor.py --list-langs` (zoom a la tabla) | "Construí una herramienta gratuita que habla 17 lenguas indígenas mexicanas." |
 | 15-30s | Correr `conversor.py "Bienvenidos a la comunidad..." --lang yua` en tiempo real (acelerar esperas) | "Le escribes cualquier texto — o le pegas un video de YouTube — y te lo devuelve hablado." |
 | 30-40s | ▶️ Reproducir el .wav en maya generado — MOSTRAR el audio player | "Escucha. Esto es maya yucateco, generado hace diez segundos, sin empresas de por medio." |
 | 40-50s | Tu cara / texto: "Falta la voz real" | "Pero la IA necesita voces reales — y casi no existen grabaciones abiertas. Vamos a Yucatán a grabarlas, pagando a los hablantes." |
@@ -86,15 +86,17 @@ El donante NO entiende "pipeline de orquestación de modelos". SÍ entiende:
 
 **Truco de grabación:** grabar terminal con `cmd+shift+5` (grabador nativo macOS), narración aparte con el cel o QuickTime, juntar en CapCut (gratis) o iMovie.
 
-### Audios demo a generar ANTES del video:
+### Audios demo — YA GENERADOS ✅ (2026-11-22, en `output_audio/`):
 ```bash
-export GOOGLE_API_KEY="tu_key"
-export HF_TOKEN="tu_token"
 cd ~/Documents/lenguas-indigenas
-python3 conversor.py "Bienvenidos. Hoy aprendemos juntos a cuidar el agua de nuestra comunidad." --lang yua --output demo_maya
-python3 conversor.py "Tu salud es importante. Escucha esta información en tu propia lengua." --lang nah --output demo_nahuatl
-python3 conversor.py "Los abuelos nos enseñaron que la tierra se cuida sembrando." --lang zap --output demo_zapoteco
+.venv/bin/python conversor.py "Bienvenidos. Hoy aprendemos juntos a cuidar el agua de nuestra comunidad." --lang yua --output demo_maya
+.venv/bin/python conversor.py "Tu salud es importante. Escucha esta información en tu propia lengua." --lang nah --output demo_nahuatl
+.venv/bin/python conversor.py "Los abuelos nos enseñaron que la tierra se cuida sembrando." --lang mam --output demo_mam
 ```
+> Nota: NO hace falta GOOGLE_API_KEY — el `.env` del proyecto ya tiene las keys
+> Groq vivas (traducción + Whisper). `zap` se cambió por `mam`: el modelo de
+> traducción alucina en zapoteco (loop de sílabas); el conversor ya detecta y
+> descarta salidas degeneradas.
 
 ---
 

@@ -11,7 +11,7 @@ Formulario corto — se envía por email/formulario sencillo.
 **lenguas-indigenas-mx** — open speech toolkit for underrepresented languages
 
 ## Can you explain the whole project in one sentence?
-An open-source toolkit and replicable protocol that turns any text or video into spoken audio in low-resource languages — starting with 8 indigenous languages of Mexico — so the open internet becomes usable for the ~7 million people it currently excludes.
+An open-source toolkit and replicable protocol that turns any text or video into spoken audio in low-resource languages — starting with 17 indigenous languages of Mexico — so the open internet becomes usable for the ~7 million people it currently excludes.
 
 ## Requested amount
 **€15,000** (rango conservador; pide lo que necesites justificar — desglose abajo)
@@ -19,7 +19,7 @@ An open-source toolkit and replicable protocol that turns any text or video into
 ## What are you going to do? (work plan)
 
 1. **Harden the prototype into a distributable toolkit** (Python package + CLI + minimal web demo). Current state: working single-file pipeline (yt-dlp → Whisper → LLM translation → Meta MMS-TTS) already public under MIT. Deliverables: `pip install` package, docs EN/ES, test coverage, offline mode via local Llama (no API keys, no cloud dependency).
-2. **Language-variant mapping layer**: map INALI's 68 groupings / 364 Mexican variants to the nearest MMS-TTS checkpoints, exposing a `--variant` flag — making the toolkit useful beyond the 8 flagship languages.
+2. **Language-variant mapping layer**: map INALI's 68 groupings / 364 Mexican variants to the nearest MMS-TTS checkpoints, exposing a `--variant` flag — making the toolkit useful beyond the 17 languages already wired.
 3. **Corpus toolkit + governance templates**: consent forms (ES + indigenous language), recording protocol, validation workflow, and license templates so communities can produce and own their own open speech data. This is the reusable "block" for the open internet.
 4. **Pilot with maya yucateco community** (Yucatán): record + validate initial open corpus, proving the protocol end-to-end.
 

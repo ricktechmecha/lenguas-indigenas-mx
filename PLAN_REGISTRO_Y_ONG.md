@@ -27,10 +27,10 @@
 
 ### 4. Correos/convocatorias — template de pitch (borrador)
 ```
-Subject: Open-source pipeline — text/video to audio in 8 Mexican indigenous languages
+Subject: Open-source pipeline — text/video to audio in 17 Mexican indigenous languages
 
 We built an open-source pipeline converting any text/YouTube video into spoken
-audio in náhuatl, maya, mixteco, zapoteco, otomí, tzotzil, tzeltal and mam
+audio in náhuatl, maya, mixteco, zapoteco, otomí, mam, huasteco, mazateco, triqui, chatino, wixárika, huave, purépecha, totonaco, tepehua, mayo and popoloca
 (Whisper ASR → translation → Meta MMS-TTS, extensible to 1,100+ languages).
 We seek funding to build a community-validated open corpus with native speakers.
 Repo: github.com/ricktechmecha/lenguas-indigenas
