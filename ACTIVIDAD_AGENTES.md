@@ -4,6 +4,21 @@
 
 ---
 
+## 2026-11-23 ~02:00 — Devin (mac-lap) — documentación de fondeo completa
+
+**Se pidió:** justificar por qué ayuda a la humanidad, por qué merecemos premios/fondos, e investigar cada premio para redactar su propia solicitud.
+
+**Hecho:**
+- Verificadas convocatorias reales (web): Mozilla Fellowship 2027 LOI cierra 17-dic-2026 ($125k, tracks Embedded/Independent); NLnet Restack €5-50k cada ~2 meses (GenAI fuera de scope → se vende como open-data commons); Lacuna ACTS cerró 13-nov (plantilla lista pa' próxima); UNESCO PP hasta $26k vía Comisión Nacional (requiere OSC aliada); ISOC research $200-500k.
+- `fondeo/JUSTIFICACION_HUMANIDAD.md` — justificación maestra con evidencia medida.
+- `APLICACION_MOZILLA_FELLOWSHIP.md` — reescrito como LOI listo-para-enviar (~500 palabras/sección) con scores y cobertura.
+- `APLICACION_NLNET_RESTACK.md` — propuesta completa EN: abstract, fit Restack, plan 12m, budget ~€50k.
+- `APLICACION_LACUNA.md` — posicionamiento + spec de dataset + checklist para próxima convocatoria.
+- `APLICACION_UNESCO_PP.md` — borrador ES + ruta por comisión nacional.
+- `ROADMAP_FONDEO.md` — actualizado con deadlines verificados y evidencia nueva.
+
+---
+
 ## 2026-11-23 ~01:10 — Devin (mac-lap) — pruebas E2E + fixes reales
 
 **Pruebas entrada/salida por la app:**

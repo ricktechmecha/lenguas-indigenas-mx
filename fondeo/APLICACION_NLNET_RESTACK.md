@@ -1,52 +1,85 @@
-# Aplicación — NLnet Restack
-**Deadline: 3-ene-2027 12:00 CET** | Rango: €5,000–50,000 | Acepta individuos, exige FLOSS (MIT ✅)
-Portal: nlnet.nl/propose → fondo "Restack"
-Formulario corto — se envía por email/formulario sencillo.
+# NLnet — Open Internet Stack "Restack" — borrador de propuesta
 
-> ⚠️ Restack financia "bloques de construcción del internet abierto". El pitch correcto: **toolkit open-source de accesibilidad lingüística = building block para un internet no-anglocéntrico**, NO "app de traducción".
+**Fondo:** Restack (sucesor de NGI Zero) — grants R&D **€5,000–€50,000**,
+llamadas abiertas cada ~2 meses. Verificado 2026-11-22:
+siguiente ventana de deadline ~**3-ene-2027** (ciclo abierto desde 3-nov).
+Portal: nlnet.nl → Apply for funding → Restack / open call.
+
+> Restack financia "digital commons" en toda la pila: datos abiertos,
+> software libre, estándares abiertos. Nuestro encaje: **open speech data +
+> open models + open evaluation** para lenguas desatendidas = internet stack
+> más inclusivo.
 
 ---
 
-## Project name
-**lenguas-indigenas-mx** — open speech toolkit for underrepresented languages
+## Project title
 
-## Can you explain the whole project in one sentence?
-An open-source toolkit and replicable protocol that turns any text or video into spoken audio in low-resource languages — starting with 17 indigenous languages of Mexico — so the open internet becomes usable for the ~7 million people it currently excludes.
+**Voces Abiertas: corpus de habla consentido y modelos abiertos para
+lenguas indígenas de bajos recursos**
 
-## Requested amount
-**€15,000** (rango conservador; pide lo que necesites justificar — desglose abajo)
+## Abstract (~150 palabras, EN)
 
-## What are you going to do? (work plan)
+> We propose to build the missing data layer for linguistic equity on the
+> open internet: a consent-governed speech corpus for Mexican indigenous
+> languages (starting with Yucatec Maya and Isthmus Zapotec), used to
+> fine-tune open speech models (VITS/MMS-TTS for voice, LoRA adapters for
+> translation) and to publish the evaluation harness that makes progress
+> measurable. Motivation is measured, not rhetorical: frontier LLMs score
+> 0.00–0.49 on back-translation into these languages while open NMT reaches
+> 0.58–0.75 — the bottleneck is community-owned data, which no commercial
+> actor will fund. All outputs (audio, text, code, evals) will be open
+> license and reusable by any community worldwide.
 
-1. **Harden the prototype into a distributable toolkit** (Python package + CLI + minimal web demo). Current state: working single-file pipeline (yt-dlp → Whisper → LLM translation → Meta MMS-TTS) already public under MIT. Deliverables: `pip install` package, docs EN/ES, test coverage, offline mode via local Llama (no API keys, no cloud dependency).
-2. **Language-variant mapping layer**: map INALI's 68 groupings / 364 Mexican variants to the nearest MMS-TTS checkpoints, exposing a `--variant` flag — making the toolkit useful beyond the 17 languages already wired.
-3. **Corpus toolkit + governance templates**: consent forms (ES + indigenous language), recording protocol, validation workflow, and license templates so communities can produce and own their own open speech data. This is the reusable "block" for the open internet.
-4. **Pilot with maya yucateco community** (Yucatán): record + validate initial open corpus, proving the protocol end-to-end.
+## Why this fits Restack
 
-## Why is this relevant to an open internet stack?
+- **Open data commons:** the corpus itself is the contribution — CARE-
+  governed, openly licensed, documented.
+- **Open source everywhere:** pipeline already MIT; models are open
+  (MMS/VITS/NLLB); evaluation tools open.
+- **User autonomy:** communities own their linguistic data — the opposite
+  of vendor lock-in.
+- **Reusability:** playbook replicable for any of the ~6,880 uncovered
+  languages in our coverage matrix.
 
-> Today's internet speech layer is a walled garden: commercial TTS covers ~50 profitable languages, and ~7,000 others are invisible — no voice interfaces, no audio accessibility, no machine translation speech. Our contribution is a composable, permissively-licensed building block (orchestration layer + variant mapping + community data protocol) that any open application can reuse to voice-enable content in underrepresented languages. Everything produced — code, protocol, corpus, docs — is published under MIT / open data licenses. Without this layer, "open internet" silently means "internet for speakers of rich languages only".
+## Work plan (12 meses, hitos)
 
-## Compare with existing efforts
+1. **Meses 1–3:** protocolo de consentimiento + grabación piloto (30–50
+   hablantes, maya yucateco + zapoteco del Istmo), gobernanza comunitaria.
+2. **Meses 4–6:** limpieza/segmentación del corpus; fine-tune VITS desde
+   checkpoint MMS base; evaluación con hablantes.
+3. **Meses 7–9:** adaptador de traducción (LoRA sobre NLLB/LLM abierto)
+   entrenado con pares del corpus + diccionarios abiertos.
+4. **Meses 10–12:** publicación del dataset + modelos + harness de
+   evaluación; playbook replicable; blogpost técnico abierto.
 
-- **Meta MMS** (research): the TTS checkpoints we orchestrate — we add the usable toolkit + data layer on top.
-- **Common Voice (Mozilla)**: covers few indigenous Mexican variants and is not community-governed; our protocol fixes the governance gap and our pipeline complements their data.
-- **Google Translate / commercial TTS**: closed, paid, no indigenous Mexican languages for speech output.
-- Novelty: end-to-end open pipeline + variant mapping + community-consent corpus protocol — no existing open equivalent for these languages.
+## Budget (EUR, propuesta)
 
-## Costs breakdown (€15,000)
-
-| Item | € |
+| Concepto | EUR |
 |---|---|
-| Development time (toolkit, variants, tests, docs) — ~6 months part-time | 9,000 |
-| Native speaker compensation for pilot corpus (mayan) | 3,000 |
-| Equipment + community travel (Yucatán pilot) | 2,000 |
-| Hosting/domain/misc infra | 1,000 |
+| Compensación hablantes + logística grabación | 18,000 |
+| GPU cloud (fine-tuning ~200–400h) | 10,000 |
+| Validación con comunidades (talleres) | 8,000 |
+| Desarrollo + documentación + diseminación | 9,000 |
+| Contingencia | 5,000 |
+| **Total** | **~50,000** |
 
-## Timeline
+> Si el tope del ciclo es menor, escalar a ~€25k: solo maya yucateco,
+> corpus más pequeño, mismos entregables de datos abiertos.
 
-~6 months. Milestones: M1 package+docs, M2 variant mapping, M3 corpus toolkit, M4 pilot corpus + report.
+## Current status / proof of work
 
-## Sustainability
+- Pipeline E2E público y verificado: `python3 app.py` → texto/YouTube →
+  audio en lengua destino (116 lenguas con cobertura completa hoy).
+- Matriz de cobertura mundial honesta: 116 completas / 901 voz-sin-
+  traducción / 3 solo-texto / ~6,880 sin datos.
+- Métricas publicadas: `docs/MAPA_DEL_HUECO.md` (LLM 0.00–0.49 vs NMT
+  0.58–0.75 en 8 lenguas).
+- Repo: https://github.com/ricktechmecha/lenguas-indigenas-mx
 
-MIT-licensed repo with public roadmap; corpus governance charter hands ownership to the community; maintainer actively applying to complementary funders (Mozilla Fellowship, Lacuna Fund, FLOSS/fund) — NLnet's grant de-risks and accelerates, it is not sole dependency.
+## Equipo
+
+- **Rick Rodríguez** — desarrollador independiente, CDMX. Construyó todo el
+  pipeline, la evaluación y la matriz de cobertura.
+- **[Por confirmar]** Lingüista/antropólogo aliado para gobernanza del
+  corpus; comunidad socia en Yucatán (por formalizar — mencionar nombre si
+  existe antes de enviar).
