@@ -8,15 +8,23 @@ Conversor de contenido (texto o video de YouTube) a audio en lenguas indígenas 
 
 ## Stack
 
-- Python 3.12 — un solo archivo `conversor.py`
-- Deps: `transformers scipy torch yt-dlp playwright` + `openai-whisper` (brew)
-- Keys: `GOOGLE_API_KEY`, `HF_TOKEN` — SOLO por env vars (ya limpiadas del código)
+- Python 3.12 — un solo archivo `conversor.py` (venv en `.venv/`, no del sistema)
+- Deps: `transformers scipy torch yt-dlp` + `openai-whisper`, `ffmpeg` (en /usr/local/bin)
+- Keys: SOLO por env vars o `.env` en raíz (auto-cargado, gitignored). Rotación: `X_API_KEY`, `X_API_KEY_2`..`_5`.
+- Traductores (`--translator`): `groq` (gratis, recomendado), `gemini`, `ollama-cloud`, `cerebras`, `llama` (Ollama local, offline). `auto` prueba todos.
+- STT (`--stt`): `groq` (whisper-large-v3-turbo API, gratis) o `local` (whisper CLI).
+
+### Keys verificadas 2026-11-22
+
+- **VIVAS:** GROQ ×3 (traducción gpt-oss-120b + Whisper STT), ElevenLabs, Ollama Cloud ×5 (auth OK pero 402 sin créditos)
+- **MUERTAS:** Google ×8 (todas, 400/403 leaked), OpenRouter ×4, HF ×2, Cerebras (402), Groq ×2
+- Copia de las Groq vivas en `.env` del proyecto. Inventario maestro: `ricpersonal/API_KEYS_ESTADO.md`
 
 ## Comandos de verificación
 
 ```bash
-python3 conversor.py --list-langs
-python3 conversor.py "Texto de prueba" --lang nah   # genera .wav en output_audio/
+.venv/bin/python conversor.py --list-langs
+.venv/bin/python conversor.py "Texto de prueba" --lang nah   # genera .wav en output_audio/
 ```
 
 ## Reglas del proyecto
@@ -28,14 +36,15 @@ python3 conversor.py "Texto de prueba" --lang nah   # genera .wav en output_audi
 
 ## Pendientes (roadmap)
 
-- [ ] `requirements.txt` / `pyproject.toml`
-- [ ] Manejo de error cuando falta key (mensaje claro, no crash)
-- [ ] README en inglés + demo (video/gif corto)
-- [ ] Licencia (sugerida MIT o Apache-2.0 — compatible con MMS)
-- [ ] `.gitignore`: output_audio/, .env, __pycache__, .venv*
-- [ ] Evaluar fallback de traducción a Llama local (desbloquea Meta Llama Impact Grants)
+- [x] `requirements.txt`
+- [x] Manejo de error cuando falta key (mensaje claro + rotación automática)
+- [ ] Demo (video/gif corto) — audios demo pendientes de generar
+- [x] Licencia MIT
+- [x] `.gitignore`: output_audio/, .env, __pycache__, .venv*
+- [x] Fallback de traducción (multi-backend: Groq/Gemini/Ollama-Cloud/Cerebras/Llama local — `--translator llama` para Meta Llama Grants)
 - [ ] Extender a variantes INALI (68 agrupaciones / 364 variantes — vía mapeo a modelos MMS más cercanos)
-- [ ] Modo "corpus": grabación de hablantes nativos para dataset abierto (requisito Lacuna)
+- [ ] Modo "corpus": grabación de hablantes nativos para dataset abierto (requisito Lacuna) — ver `docs/ENTRENAMIENTO_MODELOS.md`
+- [ ] Entrenar/fine-tune modelos propios — plan en `docs/ENTRENAMIENTO_MODELOS.md` (bloqueado: falta corpus consentido, no compute)
 
 ## No hacer
 

@@ -20,27 +20,88 @@ Dependencias:
 """
 
 import os, sys, json, time, subprocess, tempfile, base64
-import urllib.request
+import urllib.request, urllib.error
 from pathlib import Path
 from typing import Optional
 
 # ─── CONFIG ────────────────────────────────────────────────────────────────
-GOOGLE_KEY  = os.getenv("GOOGLE_API_KEY", "")
-HF_TOKEN    = os.getenv("HF_TOKEN", "")
-OUTPUT_DIR  = Path(os.getenv("OUTPUT_DIR", "output_audio"))
-OLLAMA_HOST = os.getenv("OLLAMA_HOST", "http://localhost:11434")
-LLAMA_MODEL = os.getenv("LLAMA_MODEL", "llama3.1:8b")
+def _load_dotenv():
+    """Carga .env del cwd si existe (KEY=VALUE, sin comillas obligatorias)."""
+    env_file = Path(".env")
+    if not env_file.exists():
+        return
+    for line in env_file.read_text(encoding="utf-8").splitlines():
+        line = line.strip()
+        if not line or line.startswith("#") or "=" not in line:
+            continue
+        k, _, v = line.partition("=")
+        k, v = k.strip(), v.strip().strip("'\"")
+        if k and k not in os.environ:
+            os.environ[k] = v
 
+_load_dotenv()
+
+def _key_chain(base: str, n: int = 5) -> list:
+    """Junta BASE, BASE_2..BASE_n del entorno. Permite rotar keys gratis."""
+    keys = []
+    for suffix in [""] + [f"_{i}" for i in range(2, n + 1)]:
+        k = os.getenv(f"{base}{suffix}", "").strip()
+        if k:
+            keys.append(k)
+    return keys
+
+GOOGLE_KEYS   = _key_chain("GOOGLE_API_KEY")
+GROQ_KEYS     = _key_chain("GROQ_API_KEY")
+OLLAMA_KEYS   = _key_chain("OLLAMA_API_KEY")   # ollama.com cloud (API de pago/créditos)
+CEREBRAS_KEYS = _key_chain("CEREBRAS_API_KEY") # cerebras.ai (de pago tras trial)
+HF_TOKEN      = os.getenv("HF_TOKEN", "")
+OUTPUT_DIR    = Path(os.getenv("OUTPUT_DIR", "output_audio"))
+OLLAMA_HOST   = os.getenv("OLLAMA_HOST", "http://localhost:11434")
+LLAMA_MODEL   = os.getenv("LLAMA_MODEL", "llama3.1:8b")
+GROQ_MODEL    = os.getenv("GROQ_MODEL", "openai/gpt-oss-120b")
+OCLOUD_MODEL  = os.getenv("OLLAMA_CLOUD_MODEL", "gemma4:31b")
+CEREBRAS_MODEL= os.getenv("CEREBRAS_MODEL", "gpt-oss-120b")
+
+# Groq sienta detrás de Cloudflare: un UA de navegador evita el bloqueo 1010
+HTTP_UA = ("Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) "
+           "AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0 Safari/537.36")
+
+# Modelos MMS-TTS verificados contra huggingface.co (2026-11-22).
+# OJO: no existe mms-tts-{lengua} genérico para todas — MMS publica por variante
+# (ISO 639-3 / sufijos -dialect_). Tzotzil (tzo) y Tzeltal (tzh) NO tienen
+# checkpoint publicado.
 LANGUAGES = {
-    "nah": {"name": "Náhuatl",        "mms": "facebook/mms-tts-nah", "gemini_hint": "náhuatl clásico de México central"},
-    "yua": {"name": "Maya Yucateco",  "mms": "facebook/mms-tts-yua", "gemini_hint": "maya yucateco (maya peninsular)"},
-    "mix": {"name": "Mixteco",        "mms": "facebook/mms-tts-mix", "gemini_hint": "mixteco (Tu'un savi)"},
-    "zap": {"name": "Zapoteco",       "mms": "facebook/mms-tts-zap", "gemini_hint": "zapoteco del Valle de Oaxaca"},
-    "oto": {"name": "Otomí",          "mms": "facebook/mms-tts-oto", "gemini_hint": "hñähñu / otomí del Valle del Mezquital"},
-    "tzo": {"name": "Tzotzil",        "mms": "facebook/mms-tts-tzo", "gemini_hint": "tzotzil de Chiapas"},
-    "tzh": {"name": "Tzeltal",        "mms": "facebook/mms-tts-tzh", "gemini_hint": "tzeltal de Chiapas"},
-    "mam": {"name": "Mam",            "mms": "facebook/mms-tts-mam", "gemini_hint": "mam (lengua maya de Chiapas/Guatemala)"},
-    "spa": {"name": "Español (demo)", "mms": None,                   "gemini_hint": "español"},
+    # ── lenguas principales ──
+    "nah": {"name": "Náhuatl (Altiplano)",   "mms": "facebook/mms-tts-azz",                        "hint": "náhuatl del Altiplano de Puebla, México central"},
+    "yua": {"name": "Maya Yucateco",         "mms": "facebook/mms-tts-yua",                        "hint": "maya yucateco (maya peninsular)"},
+    "mix": {"name": "Mixteco de Alcozauca",  "mms": "facebook/mms-tts-xta",                        "hint": "mixteco de Alcozauca, Guerrero (Tu'un savi)"},
+    "zap": {"name": "Zapoteco del Istmo",    "mms": "facebook/mms-tts-zai",                        "hint": "zapoteco del Istmo de Tehuantepec, Oaxaca"},
+    "oto": {"name": "Otomí de Querétaro",    "mms": "facebook/mms-tts-otq",                        "hint": "otomí de Querétaro (hñähñu)"},
+    "mam": {"name": "Mam",                   "mms": "facebook/mms-tts-mam-dialect_central",        "hint": "mam central (lengua maya de Chiapas/Guatemala)"},
+    "hus": {"name": "Huasteco / Teenek",     "mms": "facebook/mms-tts-hus-dialect_centralveracruz","hint": "huasteco / teenek de Veracruz"},
+    "maz": {"name": "Mazateco",              "mms": "facebook/mms-tts-maz",                        "hint": "mazateco de Oaxaca"},
+    "tri": {"name": "Triqui de Copala",      "mms": "facebook/mms-tts-tri",                        "hint": "triqui de Copala, Oaxaca"},
+    "cya": {"name": "Chatino de Nopala",     "mms": "facebook/mms-tts-cya",                        "hint": "chatino de Nopala, Oaxaca"},
+    "hui": {"name": "Wixárika / Huichol",    "mms": "facebook/mms-tts-hui",                        "hint": "wixárika / huichol"},
+    "huv": {"name": "Huave / Ikoots",        "mms": "facebook/mms-tts-huv",                        "hint": "huave / ikoots de San Mateo del Mar, Oaxaca"},
+    "tsz": {"name": "Purépecha",             "mms": "facebook/mms-tts-tsz",                        "hint": "purépecha / p'urhépecha de Michoacán"},
+    "toc": {"name": "Totonaco",              "mms": "facebook/mms-tts-toc",                        "hint": "totonaco de la Sierra Norte de Puebla"},
+    "tpp": {"name": "Tepehua",               "mms": "facebook/mms-tts-tpp",                        "hint": "tepehua"},
+    "mfy": {"name": "Mayo / Yoreme",         "mms": "facebook/mms-tts-mfy",                        "hint": "mayo / yoreme de Sonora y Sinaloa"},
+    "cab": {"name": "Popoloca",              "mms": "facebook/mms-tts-cab",                        "hint": "popoloca / ngigua"},
+    # ── variantes de náhuatl ──
+    "nah-gro": {"name": "Náhuatl de Guerrero",          "mms": "facebook/mms-tts-ngu", "hint": "náhuatl de Guerrero"},
+    "nah-oax": {"name": "Náhuatl del Norte de Oaxaca",  "mms": "facebook/mms-tts-nhy", "hint": "náhuatl del Norte de Oaxaca"},
+    "nah-hua": {"name": "Náhuatl de la Huasteca",       "mms": "facebook/mms-tts-nhe", "hint": "náhuatl de la Huasteca oriental"},
+    "nah-mor": {"name": "Náhuatl de Morelos/Oaxaca",    "mms": "facebook/mms-tts-nch", "hint": "náhuatl de la Huasteca (mms-tts-nch)"},
+    "nah-mic": {"name": "Náhuatl de Michoacán",         "mms": "facebook/mms-tts-ncl", "hint": "náhuatl de Michoacán"},
+    "nah-tla": {"name": "Náhuatl de Tlamacazapa",       "mms": "facebook/mms-tts-nuz", "hint": "náhuatl de Tlamacazapa, Guerrero"},
+    # ── variantes de zapoteco y mixteco frecuentes ──
+    "zap-val": {"name": "Zapoteco del Valle",   "mms": "facebook/mms-tts-zab", "hint": "zapoteco del Valle de Oaxaca (Tlacolula)"},
+    "zap-sie": {"name": "Zapoteco de la Sierra","mms": "facebook/mms-tts-zaa", "hint": "zapoteco de la Sierra de Juárez"},
+    "mix-ata": {"name": "Mixteco de Atatlahuca","mms": "facebook/mms-tts-mib", "hint": "mixteco de Atatlahuca, Oaxaca"},
+    # ── demo ──
+    "spa": {"name": "Español (demo)", "mms": None, "hint": "español"},
 }
 
 # ─── STEP 1: DESCARGA DE VIDEO ──────────────────────────────────────────────
@@ -104,59 +165,50 @@ def transcribe_with_whisper(audio_path: Path, model: str = "small", language: st
             print(f"  ❌ Error Whisper: {e}")
             return None
 
-# ─── STEP 3: TRADUCCIÓN A LENGUA INDÍGENA ──────────────────────────────────
-def translate_with_gemini(text: str, lang_code: str, retries: int = 3) -> Optional[str]:
-    """Traduce texto a lengua indígena usando Gemini."""
-    lang_info  = LANGUAGES[lang_code]
-    lang_name  = lang_info["name"]
-    lang_hint  = lang_info["gemini_hint"]
-    
-    prompt = f"""Traduce el siguiente texto al {lang_name} ({lang_hint}).
-
-IMPORTANTE:
-- Proporciona ÚNICAMENTE la traducción, sin explicaciones ni notas.
-- Usa vocabulario auténtico y gramática correcta de la lengua.
-- Si alguna palabra no tiene equivalente directo, usa el préstamo más común en esa lengua.
-- Si el texto es muy largo, mantén el sentido completo.
-
-Texto a traducir (español):
-{text}
-
-Traducción al {lang_name}:"""
-
-    for attempt in range(retries):
+def transcribe_with_groq(audio_path: Path, language: str = "es") -> Optional[str]:
+    """Transcribe con Groq Whisper API (gratis, ~segundos). Rota GROQ_API_KEY.._5."""
+    boundary = "----conversorboundary"
+    audio_bytes = audio_path.read_bytes()
+    parts = []
+    for name, val in [("model", "whisper-large-v3-turbo"), ("language", language),
+                      ("response_format", "text")]:
+        parts.append(f'--{boundary}\r\nContent-Disposition: form-data; name="{name}"\r\n\r\n{val}\r\n'.encode())
+    parts.append(f'--{boundary}\r\nContent-Disposition: form-data; name="file"; filename="{audio_path.name}"\r\n'
+                 f'Content-Type: audio/mpeg\r\n\r\n'.encode() + audio_bytes + b"\r\n")
+    parts.append(f"--{boundary}--\r\n".encode())
+    body = b"".join(parts)
+    for i, key in enumerate(GROQ_KEYS):
         try:
-            payload = {"contents": [{"parts": [{"text": prompt}]}],
-                       "generationConfig": {"temperature": 0.3, "maxOutputTokens": 2000}}
             req = urllib.request.Request(
-                f"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key={GOOGLE_KEY}",
-                data=json.dumps(payload).encode(),
-                headers={"Content-Type": "application/json"}, method="POST"
-            )
-            with urllib.request.urlopen(req, timeout=30) as r:
-                resp = json.loads(r.read())
-            translation = resp["candidates"][0]["content"]["parts"][0]["text"].strip()
-            print(f"  ✅ Traducido a {lang_name}: {translation[:80]}...")
-            return translation
+                "https://api.groq.com/openai/v1/audio/transcriptions", data=body,
+                headers={"Authorization": f"Bearer {key}", "User-Agent": HTTP_UA,
+                         "Content-Type": f"multipart/form-data; boundary={boundary}"},
+                method="POST")
+            with urllib.request.urlopen(req, timeout=180) as r:
+                text = r.read().decode("utf-8").strip()
+            print(f"  ✅ Transcripción Groq Whisper ({len(text)} chars)")
+            return text
         except urllib.error.HTTPError as e:
-            if e.code == 429:
-                time.sleep(15 * (attempt + 1))
-            else:
-                print(f"  ❌ HTTP {e.code}")
-                return None
+            print(f"  ⚠️  Groq STT key{i+1}: HTTP {e.code} — probando siguiente")
         except Exception as e:
-            print(f"  ❌ Error traducción: {e}")
-            return None
+            print(f"  ⚠️  Groq STT key{i+1}: {e}")
     return None
 
-def translate_with_llama(text: str, lang_code: str, retries: int = 2) -> Optional[str]:
-    """Traduce con Llama local vía Ollama (sin API key, sin costo, sin nube).
-    Requiere: `ollama serve` corriendo y el modelo descargado (`ollama pull llama3.1:8b`)."""
-    lang_info = LANGUAGES[lang_code]
-    lang_name = lang_info["name"]
-    lang_hint = lang_info["gemini_hint"]
+def transcribe(audio_path: Path, stt: str = "auto") -> Optional[str]:
+    """'auto': Groq Whisper si hay key, si no Whisper local."""
+    if stt in ("auto", "groq") and GROQ_KEYS:
+        t = transcribe_with_groq(audio_path)
+        if t or stt == "groq":
+            return t
+        print("  🔄 Groq STT falló — usando Whisper local...")
+    if stt in ("auto", "local"):
+        return transcribe_with_whisper(audio_path)
+    return None
 
-    prompt = f"""Translate the following text to {lang_name} ({lang_hint}).
+# ─── STEP 3: TRADUCCIÓN A LENGUA INDÍGENA ──────────────────────────────────
+def _translation_prompt(text: str, lang_code: str) -> str:
+    lang_info = LANGUAGES[lang_code]
+    return f"""Translate the following text to {lang_info['name']} ({lang_info['hint']}).
 
 RULES:
 - Output ONLY the translation, no explanations or notes.
@@ -166,7 +218,109 @@ RULES:
 Text (Spanish):
 {text}
 
-Translation to {lang_name}:"""
+Translation to {lang_info['name']}:"""
+
+def _chat_completion(url: str, keys: list, model: str, prompt: str,
+                     extra: dict = None, label: str = "") -> Optional[str]:
+    """POST OpenAI-compatible chat completions con rotación de keys."""
+    payload = {"model": model, "temperature": 0.3,
+               "messages": [{"role": "user", "content": prompt}]}
+    if extra:
+        payload.update(extra)
+    body = json.dumps(payload).encode()
+    for i, key in enumerate(keys):
+        try:
+            req = urllib.request.Request(
+                url, data=body,
+                headers={"Content-Type": "application/json",
+                         "Authorization": f"Bearer {key}",
+                         "User-Agent": HTTP_UA},
+                method="POST")
+            with urllib.request.urlopen(req, timeout=120) as r:
+                resp = json.loads(r.read())
+            text_out = resp["choices"][0]["message"].get("content", "").strip()
+            if text_out:
+                return text_out
+        except urllib.error.HTTPError as e:
+            tag = f"{label or url} key{i+1}"
+            if e.code in (400, 401, 402, 403):
+                print(f"  ⚠️  {tag}: HTTP {e.code} — key inválida/sin crédito, probando siguiente")
+            elif e.code == 429:
+                print(f"  ⚠️  {tag}: 429 rate limit — probando siguiente key")
+            else:
+                print(f"  ⚠️  {tag}: HTTP {e.code}")
+            continue
+        except Exception as e:
+            print(f"  ⚠️  {label or url} key{i+1}: {e}")
+            continue
+    return None
+
+def translate_with_gemini(text: str, lang_code: str, retries: int = 2) -> Optional[str]:
+    """Traduce con Gemini, rotando GOOGLE_API_KEY.._5 (la cuota es por key)."""
+    prompt = _translation_prompt(text, lang_code)
+    for key in GOOGLE_KEYS:
+        for attempt in range(retries):
+            try:
+                payload = {"contents": [{"parts": [{"text": prompt}]}],
+                           "generationConfig": {"temperature": 0.3, "maxOutputTokens": 2000}}
+                req = urllib.request.Request(
+                    f"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key={key}",
+                    data=json.dumps(payload).encode(),
+                    headers={"Content-Type": "application/json"}, method="POST")
+                with urllib.request.urlopen(req, timeout=30) as r:
+                    resp = json.loads(r.read())
+                translation = resp["candidates"][0]["content"]["parts"][0]["text"].strip()
+                print(f"  ✅ Traducido (Gemini): {translation[:80]}...")
+                return translation
+            except urllib.error.HTTPError as e:
+                if e.code == 429 and attempt < retries - 1:
+                    time.sleep(15 * (attempt + 1))
+                elif e.code in (400, 401, 403):
+                    print(f"  ⚠️  Gemini key …{key[-6:]}: HTTP {e.code} — probando siguiente")
+                    break
+                else:
+                    print(f"  ⚠️  Gemini: HTTP {e.code}")
+                    break
+            except Exception as e:
+                print(f"  ⚠️  Gemini: {e}")
+                break
+    return None
+
+def translate_with_groq(text: str, lang_code: str) -> Optional[str]:
+    """Groq cloud (gratis con cuenta) — gpt-oss-120b u otro modelo OpenAI-compatible."""
+    t = _chat_completion("https://api.groq.com/openai/v1/chat/completions",
+                         GROQ_KEYS, GROQ_MODEL, _translation_prompt(text, lang_code),
+                         extra={"max_completion_tokens": 2000, "reasoning_effort": "low"},
+                         label="Groq")
+    if t:
+        print(f"  ✅ Traducido (Groq {GROQ_MODEL}): {t[:80]}...")
+    return t
+
+def translate_with_ollama_cloud(text: str, lang_code: str) -> Optional[str]:
+    """Ollama Cloud (ollama.com) — requiere créditos; gemma4/multimodal disponible."""
+    t = _chat_completion("https://ollama.com/v1/chat/completions",
+                         OLLAMA_KEYS, OCLOUD_MODEL, _translation_prompt(text, lang_code),
+                         extra={"max_completion_tokens": 2000, "stream": False},
+                         label="OllamaCloud")
+    if t:
+        print(f"  ✅ Traducido (Ollama Cloud {OCLOUD_MODEL}): {t[:80]}...")
+    return t
+
+def translate_with_cerebras(text: str, lang_code: str) -> Optional[str]:
+    """Cerebras cloud — tier de pago tras trial."""
+    t = _chat_completion("https://api.cerebras.ai/v1/chat/completions",
+                         CEREBRAS_KEYS, CEREBRAS_MODEL, _translation_prompt(text, lang_code),
+                         extra={"max_completion_tokens": 2000},
+                         label="Cerebras")
+    if t:
+        print(f"  ✅ Traducido (Cerebras {CEREBRAS_MODEL}): {t[:80]}...")
+    return t
+
+def translate_with_llama(text: str, lang_code: str, retries: int = 2) -> Optional[str]:
+    """Traduce con Llama local vía Ollama (sin API key, sin costo, sin nube).
+    Requiere: `ollama serve` corriendo y el modelo descargado (`ollama pull llama3.1:8b`)."""
+    lang_name = LANGUAGES[lang_code]["name"]
+    prompt    = _translation_prompt(text, lang_code)
 
     payload = {
         "model": LLAMA_MODEL,
@@ -197,20 +351,34 @@ Translation to {lang_name}:"""
             return None
     return None
 
+# Orden 'auto': gratis primero (Groq), luego Gemini (si hay key), nubes de pago, local al final.
+TRANSLATORS = {
+    "groq":         (translate_with_groq,         GROQ_KEYS,     "GROQ_API_KEY"),
+    "gemini":       (translate_with_gemini,       GOOGLE_KEYS,   "GOOGLE_API_KEY"),
+    "ollama-cloud": (translate_with_ollama_cloud, OLLAMA_KEYS,   "OLLAMA_API_KEY"),
+    "cerebras":     (translate_with_cerebras,     CEREBRAS_KEYS, "CEREBRAS_API_KEY"),
+    "llama":        (translate_with_llama,        None,          "Ollama local"),
+}
+AUTO_ORDER = ["groq", "gemini", "ollama-cloud", "cerebras", "llama"]
+
 def translate(text: str, lang_code: str, translator: str = "auto") -> Optional[str]:
-    """Traduce con el motor elegido. 'auto' = Gemini primero, Llama local de respaldo."""
-    if translator in ("auto", "gemini"):
-        if GOOGLE_KEY:
-            t = translate_with_gemini(text, lang_code)
-            if t:
-                return t
-            if translator == "gemini":
-                return None
-            print("  🔄 Gemini falló — intentando Llama local...")
-        elif translator == "auto":
-            print("  ⚠️  GOOGLE_API_KEY no configurada — usando Llama local directamente")
-    if translator in ("auto", "llama"):
-        return translate_with_llama(text, lang_code)
+    """Traduce con el motor elegido. 'auto' prueba cada backend con keys disponibles."""
+    order = AUTO_ORDER if translator == "auto" else [translator]
+    for name in order:
+        fn, keys, env_hint = TRANSLATORS[name]
+        if keys is not None and not keys:
+            if translator != "auto":
+                print(f"  ⚠️  {env_hint} no configurada")
+            continue
+        t = fn(text, lang_code)
+        if t:
+            return t
+        if translator != "auto":
+            return None
+        print(f"  🔄 {name} falló — probando siguiente motor...")
+    print("  ❌ Ningún traductor disponible. Opciones gratis:")
+    print("     · Groq:  crea key en console.groq.com → export GROQ_API_KEY")
+    print("     · Local: instala Ollama → ollama pull llama3.1:8b → --translator llama")
     return None
 
 # ─── STEP 4: TTS EN LENGUA INDÍGENA ─────────────────────────────────────────
@@ -226,8 +394,9 @@ def tts_mms_local(text: str, lang_code: str, out_path: Path) -> bool:
             return False
         
         print(f"  🔊 Cargando modelo MMS-TTS: {model_id}")
-        tokenizer = AutoTokenizer.from_pretrained(model_id, token=HF_TOKEN)
-        model     = VitsModel.from_pretrained(model_id, token=HF_TOKEN)
+        hf_tok    = HF_TOKEN or None  # modelos MMS son públicos; "" rompe el header
+        tokenizer = AutoTokenizer.from_pretrained(model_id, token=hf_tok)
+        model     = VitsModel.from_pretrained(model_id, token=hf_tok)
         
         inputs  = tokenizer(text, return_tensors="pt")
         with torch.no_grad():
@@ -262,7 +431,7 @@ def tts_mac_say(text: str, out_path: Path) -> bool:
 
 # ─── PIPELINE PRINCIPAL ──────────────────────────────────────────────────────
 def convert(input_source: str, lang_code: str = "nah", output_name: str = None,
-            translator: str = "auto") -> dict:
+            translator: str = "auto", stt: str = "auto") -> dict:
     """
     Convierte texto o video de YouTube a audio en lengua indígena.
     
@@ -307,8 +476,8 @@ def convert(input_source: str, lang_code: str = "nah", output_name: str = None,
             mp3_dest.write_bytes(mp3_file.read_bytes())
             result["files"]["mp3"] = str(mp3_dest)
             
-            print("\n📝 PASO 2: Transcribiendo audio (Whisper local)...")
-            spanish_text = transcribe_with_whisper(mp3_dest)
+            print("\n📝 PASO 2: Transcribiendo audio...")
+            spanish_text = transcribe(mp3_dest, stt)
     else:
         print("\n📝 PASO 1: Texto recibido directamente")
         spanish_text = input_source
@@ -398,8 +567,11 @@ Ejemplos:
     parser.add_argument("--outdir", default="output_audio",
                         help="Directorio de salida (default: output_audio)")
     parser.add_argument("--translator", "-t", default="auto",
-                        choices=["auto", "gemini", "llama"],
-                        help="Motor de traducción: auto (Gemini→Llama), gemini, o llama (local vía Ollama, gratis)")
+                        choices=["auto", "groq", "gemini", "ollama-cloud", "cerebras", "llama"],
+                        help="Traductor: auto (prueba todos), groq (gratis), gemini, "
+                             "ollama-cloud, cerebras, o llama (Ollama local)")
+    parser.add_argument("--stt", default="auto", choices=["auto", "groq", "local"],
+                        help="Transcripción: auto (Groq si hay key), groq (Whisper API), local (whisper CLI)")
     
     args = parser.parse_args()
     
@@ -420,7 +592,7 @@ Ejemplos:
         parser.print_help()
         return
     
-    result = convert(args.input, args.lang, args.output, args.translator)
+    result = convert(args.input, args.lang, args.output, args.translator, args.stt)
     sys.exit(0 if result.get("files") else 1)
 
 

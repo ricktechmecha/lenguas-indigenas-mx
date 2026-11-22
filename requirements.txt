@@ -1,8 +1,11 @@
 # Lenguas Indígenas MX — Python dependencies (Python 3.12)
 # System CLIs also required: yt-dlp, openai-whisper, ffmpeg (see README)
 
-transformers>=4.33.0
-torch>=2.0.0
+# Nota macOS Intel (x86_64): PyPI solo publica torch hasta 2.2.2 en esta
+# plataforma, por eso transformers queda pineado a 4.46.x (última compatible).
+# En Apple Silicon/Linux puedes usar versiones más nuevas.
+transformers==4.46.3
+torch>=2.0,<=2.2.2
 scipy>=1.10.0
 numpy<2.0.0
 yt-dlp>=2024.0.0

@@ -11,10 +11,11 @@ Text / YouTube URL
   yt-dlp ──► audio (mp3)
       │
       ▼
-  Whisper (local) ──► Spanish transcript
+  Whisper (local CLI or Groq API) ──► Spanish transcript
       │
       ▼
-  Gemini Flash ──► translation to target language
+  LLM translation ──► target language
+  (Groq · Gemini · Ollama Cloud · Cerebras · local Llama)
       │
       ▼
   Meta MMS-TTS ──► .wav in indigenous language
@@ -50,12 +51,29 @@ pip install -r requirements.txt
 
 ## API keys
 
-Two environment variables are required:
+Only **one** working translator backend is needed — the rest are optional fallbacks.
+Keys can live in a `.env` file in the project root (auto-loaded, gitignored) or as env vars.
 
 ```bash
-export GOOGLE_API_KEY="..."   # Gemini Flash — translation step
-export HF_TOKEN="..."         # Hugging Face — downloading MMS-TTS checkpoints
+# Option A — Groq (recommended: free tier, fast, also powers Whisper STT)
+export GROQ_API_KEY="gsk_..."          # console.groq.com — free
+
+# Option B — Google Gemini
+export GOOGLE_API_KEY="AIza..."        # aistudio.google.com — free tier
+
+# Option C — fully offline, no keys at all
+brew install ollama && ollama pull llama3.1:8b && ollama serve
+# then run with --translator llama
+
+# Optional extras
+export HF_TOKEN="hf_..."               # only if HF rate-limits model downloads
+export OLLAMA_API_KEY="..."            # ollama.com cloud (paid credits)
+export CEREBRAS_API_KEY="..."          # cerebras.ai (paid)
 ```
+
+**Key rotation:** numbered variants are picked up automatically —
+`GROQ_API_KEY`, `GROQ_API_KEY_2` … `_5` are tried in order on rate-limit or
+auth errors. Works for `GOOGLE_API_KEY`, `OLLAMA_API_KEY` and `CEREBRAS_API_KEY` too.
 
 ## Usage
 
@@ -77,7 +95,19 @@ python3 conversor.py "texto" --lang mix --outdir ./salida
 python3 conversor.py "texto" --lang nah --translator llama
 ```
 
-**Translator options** (`--translator`): `auto` (default, Gemini with Llama fallback), `gemini`, or `llama` (local via [Ollama](https://ollama.com) — no API key, no cost, works offline).
+**Translator options** (`--translator`):
+
+| Value | Backend | Cost |
+|-------|---------|------|
+| `auto` (default) | Tries every backend with a configured key: groq → gemini → ollama-cloud → cerebras → llama | — |
+| `groq` | Groq cloud, `openai/gpt-oss-120b` (set `GROQ_MODEL` to override) | Free tier |
+| `gemini` | Google Gemini 2.0 Flash | Free tier |
+| `ollama-cloud` | ollama.com hosted models (`OLLAMA_CLOUD_MODEL`, default `gemma4:31b`) | Paid credits |
+| `cerebras` | cerebras.ai (`CEREBRAS_MODEL`, default `gpt-oss-120b`) | Paid |
+| `llama` | Local Llama via [Ollama](https://ollama.com) — no key, works offline | Free |
+
+**Transcription options** (`--stt`, YouTube input only): `auto` (default — Groq
+Whisper API when `GROQ_API_KEY` is set, else local `whisper` CLI), `groq`, `local`.
 
 Output `.wav` files are written to `output_audio/` by default.
 
