@@ -4,6 +4,26 @@
 
 ---
 
+## 2026-11-23 ~03:30 — Devin (mac-lap) — skills ECC aplicadas: a11y + review + tests
+
+**Se pidió:** revisar frontend/backend con las skills del proyecto ECC (code review, tests, diseño).
+
+**Auditoría a11y (awesome-accessibility-audit) — fixes en app.py:**
+- Labels ahora asociados (for/id), skip-link, nav landmark, h2 reales (antes divs), th scope=col, aria-live en progreso/resultado/contador, aria-labels en filtros, type="url" + name + spellcheck=false, :focus-visible, color-scheme dark, theme-color, touch-action, hover en botones, prefers-reduced-motion.
+
+**Code review backend (awesome-code-review):**
+- BUG: LANGUAGES['spa'].mms=None aunque el catálogo sí tiene mms-tts-spa → spa (demo) fallaba en TTS. Corregido + engine='none' en catálogo.
+- BUG: synthesize() indexaba LANGUAGES[lang_code] → KeyError para aliases con guion/underscore → ahora resolve_language().
+- /audio/ solo servía .wav → ahora wav/webm/m4a/mp3/ogg/opus/txt con mime correcto (audio_fuente de YouTube descargable).
+- Security: Content-Length cap 2MB, jobs pruning >1h, headers nosniff/Referrer-Policy/CSP, traceback sanitizado a 1 línea.
+- JS: alert()→error inline, polling con timeout 8min + retry en fallos de red, escape de regiones, paginación 100/pág en tabla de ~1,020 lenguas, catch en fetches, default yua.
+
+**Tests (awesome-test-writing):** tests/test_core.py — 30 tests unittest stdlib, 0.02s, sin red/GPU. Mutación probada: gt_code→None falla 4 tests, _looks_refusal→False falla 1 → restaurado verde.
+
+**Web guidelines (vercel):** color-scheme, tap-highlight, text-wrap balance, tabular-nums, overflow-wrap, empty states.
+
+---
+
 ## 2026-11-23 ~02:00 — Devin (mac-lap) — documentación de fondeo completa
 
 **Se pidió:** justificar por qué ayuda a la humanidad, por qué merecemos premios/fondos, e investigar cada premio para redactar su propia solicitud.

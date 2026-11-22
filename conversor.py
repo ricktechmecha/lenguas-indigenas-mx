@@ -111,7 +111,7 @@ LANGUAGES = {
     "tzo": {"name": "Tzotzil",                 "mms": None,                                       "hint": "tzotzil — SIN checkpoint MMS, candidato a entrenar"},
     "tzh": {"name": "Tzeltal",                 "mms": None,                                       "hint": "tzeltal — SIN checkpoint MMS, candidato a entrenar"},
     # ── demo ──
-    "spa": {"name": "Español (demo)", "mms": None, "hint": "español"},
+    "spa": {"name": "Español (demo)", "mms": "facebook/mms-tts-spa", "hint": "español"},
 }
 
 # ─── RESOLUCIÓN UNIVERSAL DE LENGUA ─────────────────────────────────────────
@@ -653,7 +653,7 @@ def synthesize(text: str, lang_code: str, out_path: Path) -> Optional[dict]:
     try:
         import torch, scipy.io.wavfile as wavfile
         import numpy as np
-        model_id = LANGUAGES[lang_code]["mms"]
+        model_id = (resolve_language(lang_code) or {}).get("mms")
         if not model_id:
             return None
         tokenizer, model = _tts_load(model_id)
