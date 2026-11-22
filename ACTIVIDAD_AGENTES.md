@@ -4,6 +4,18 @@
 
 ---
 
+## 2026-11-22 ~23:15 — Devin (mac-lap)
+
+**Se pidió:** lista mundial de cobertura por idioma (cuáles cubre y cuáles no) en .md tabla.
+
+**Hecho:**
+- `tools/build_coverage_matrix.py` → `docs/LENGUAS_COBERTURA_MUNDIAL.md` (regenerable).
+- Clasificación real: 🟢A=116 (voz MMS + Google NMT), 🟡B=901 (voz MMS, traducción solo LLM), 🔵C=3 (solo texto: hch wixárika, tzo tzotzil, tzh tzeltal), 🔴D=~6,880 (resto ISO 639-3 sin datos).
+- Fixes del generador: checkpoints MMS por dialecto (mam-dialect_central, hus-…) cuentan como voz; aliases curados (nah→azz, zap→zai, mix→xta) resuelven nombre+voz vía LANGUAGES; regiones Américas unificadas.
+- México: tabla dedicada — A: kek/mam/yua/zai; C: hch/tzo/tzh.
+
+---
+
 ## 2026-11-22 ~22:30 — Devin (mac-lap)
 
 **Se pidió:** ejecutar la revisión first-principles + generar frontend, con mejor herramienta si existe.
