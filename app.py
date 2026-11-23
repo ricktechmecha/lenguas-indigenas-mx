@@ -197,6 +197,9 @@ opcionales. Nada de esto requiere modelos nuevos — es ingeniería de pipeline.
 (MMS/VITS para voz, XLS-R/Whisper para oído, NLLB/LLM para traducción)</b>.
 Ese es el proyecto de fondeo: no pedimos dinero para "un traductor" — pedimos datos y cómputo
 para cerrar el hueco que los LLMs frontera no resuelven (medido: 0.01 en zapoteco).</p>
+<p style="color:var(--ok);font-size:.85rem;margin-bottom:0">✅ La infraestructura ya existe: <code>tools/corpus_tool.py</code>
+(consentimiento → validación → datasets) y <code>train/</code> (fine-tune TTS/ASR/MT) están listos
+— solo falta alimentarlos con datos de la comunidad.</p>
 </div>
 
 <div class="note"><b>⚠️ Aviso honesto:</b> la traducción automática a lenguas de bajos recursos puede tener errores —
@@ -315,8 +318,8 @@ $('#go').onclick=async()=>{
     let polls=0;
     const t=setInterval(async()=>{
       polls++;
-      if(polls>400){clearInterval(t);$('#go').disabled=false;
-        $('#status').textContent='Tiempo agotado — el job sigue en el servidor, reintenta más tarde.';return;}
+      if(polls>900){clearInterval(t);$('#go').disabled=false;
+        $('#status').textContent='Tiempo agotado (~18min) — el job puede seguir en el servidor. Videos largos tardan; prueba con un clip corto.';return;}
       try{
         const j=await (await fetch('/api/jobs/'+j0.job)).json();
         const done=new Set(j.steps||[]);

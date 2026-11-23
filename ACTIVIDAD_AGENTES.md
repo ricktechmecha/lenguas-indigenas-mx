@@ -19,6 +19,28 @@
 
 ---
 
+## 2026-11-23 ~00:30 — Devin (mac-lap) — prueba de TODAS las opciones del frontend + fixes
+
+**Se pidió:** aplicar correcciones y probar cada opción del frontend para dejarlo listo pa' mostrar.
+
+**Pruebas con browser real (todas las vías de la UI):**
+- Landing tiers dinámicos ✅ · cobertura filtros+paginación ✅ · botón ejemplo ✅
+- Texto→yua (TTS + alfabeto 100%) ✅ · ISO libre quz E2E ✅ · spa demo ✅
+- Archivo local demo_es.m4a→hch: transcribió bien (Whisper oyó "compa" por "come pan" — honesto), traducción falló limpio ✅
+- YouTube 10min→yua: job COMPLETÓ (webm 10MB→transcripción→maya→wav 1.9MB); el poll del UI venció antes — subido a ~18min con mensaje claro ✅
+- Errores: vacío, archivo inexistente (400), texto "y/o" no rechazado ✅
+
+**Fixes aplicados:**
+- run_job: status=error cuando result.error aunque haya archivos parciales (antes decía "done")
+- Llama/Ollama: retries 2→1, timeout 180→120s (antes ~6min colgado en el peor caso)
+- Google Translate daba 429 transitorio → fallback a Groq funcionó correctamente (no es bug)
+- Landing: nota de que la infra de entrenamiento ya existe
+- Google rate-limit es externo; la cadena de fallback lo cubre por diseño ✅
+
+**Estado:** 31 unit + 10 E2E verdes; server en :8000 listo para demo.
+
+---
+
 ## 2026-11-23 ~05:30 — Devin (mac-lap) — pipeline de entrenamiento + dropdowns + demo
 
 **Se pidió:** recorrer todo el código, dejar lista la parte de entrenar Whisper/LLM propios y el pipeline faltante; arreglar dropdowns del frontend ("no puedo elegir"); config/demo por defecto; .md de lo que falta.
