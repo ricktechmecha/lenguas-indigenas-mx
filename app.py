@@ -121,6 +121,8 @@ button{background:var(--acc);color:#04121a;border:0;border-radius:8px;padding:12
 button:hover{background:#6fd3f7}
 button:active{transform:scale(.98)}
 button:disabled{opacity:.5;cursor:wait}
+button.mini{background:#0d1420;color:var(--acc);border:1px solid #2a3a52;font-size:.8rem;padding:6px 12px;margin-top:6px;font-weight:400}
+button.mini:hover{background:#182234}
 .note{background:#241d10;border:1px solid #6b5518;color:var(--warn);border-radius:10px;padding:12px 16px;font-size:.92rem}
 .steps{display:flex;gap:6px;margin:12px 0;flex-wrap:wrap}
 .steps span{font-size:.75rem;padding:4px 10px;border-radius:99px;background:#0d1420;color:#93a7bf}
@@ -268,10 +270,13 @@ verifícala con un hablante nativo. La voz es <b>síntesis</b> (MMS-TTS), no una
 </div>
 <label for="txt">Texto en español</label>
 <textarea id="txt" name="text" placeholder="Escribe aquí…"></textarea>
+<button type="button" id="ej" class="mini">Cargar ejemplo</button>
+<label for="file">— o archivo local de audio/video —</label>
+<input type="text" id="file" placeholder="ruta en esta Mac, ej. demo/demo_es.m4a" autocomplete="off" spellcheck="false">
 <label for="url">— o URL de YouTube —</label>
 <input type="url" id="url" name="url" placeholder="https://youtube.com/watch?v=…" autocomplete="off" spellcheck="false">
 <label for="engine">Motor de traducción</label>
-<select id="engine"><option value="auto">Auto (mejor disponible)</option><option value="google">Google Translate</option><option value="groq">Groq (LLM)</option><option value="llama">Ollama local</option></select>
+<select id="engine"><option value="auto">Auto (mejor disponible)</option><option value="google">Google Translate</option><option value="groq">Groq (LLM)</option><option value="gemini">Gemini</option><option value="ollama-cloud">Ollama Cloud</option><option value="cerebras">Cerebras</option><option value="llama">Ollama local</option></select>
 <button id="go" type="button">Generar</button>
 </div>
 <div id="prog" class="card hidden" aria-live="polite"><b>Progreso</b><div class="steps" id="steps" aria-hidden="true"></div><div id="status" class="mono" role="status"></div></div>
@@ -281,14 +286,24 @@ const $=s=>document.querySelector(s);
 const STEP_TXT={download:'Descargando video',transcribe:'Transcribiendo',translate:'Traduciendo',tts:'Sintetizando voz',done:'Listo'};
 fetch('/api/languages').then(r=>r.json()).then(d=>{
   const sel=$('#lang');
+  const ph=document.createElement('option');ph.value='';ph.textContent='(elige del catálogo ↓ o escribe ISO libre)';sel.appendChild(ph);
+  const grp={g:['★ Voz + traducción NMT',[]],v:['Voz MMS (traducción LLM)',[]],t:['Solo texto (sin voz)',[]]};
   d.forEach(l=>{const o=document.createElement('option');o.value=l.code;
-    o.textContent=l.name+(l.voice?'':'  (solo texto)')+(l.engine==='google'?'  ★Google':'');
-    sel.appendChild(o);});
+    o.textContent=l.name+(l.voice?'':'  (solo texto)')+(l.engine==='google'?'  ★':'');
+    grp[l.engine==='google'?'g':l.voice?'v':'t'][1].push(o);});
+  Object.values(grp).forEach(([label,opts])=>{if(!opts.length)return;
+    const g=document.createElement('optgroup');g.label=label;opts.forEach(o=>g.appendChild(o));sel.appendChild(g);});
   sel.value='yua';
 }).catch(()=>{$('#status')&&($('#status').textContent='Error cargando lenguas');});
+// Exclusión mutua: elegir del catálogo limpia el ISO libre y viceversa
+$('#lang').addEventListener('change',()=>{if($('#lang').value)$('#iso').value='';});
+$('#iso').addEventListener('input',()=>{if($('#iso').value.trim())$('#lang').value='';});
+$('#ej').onclick=()=>{
+  $('#txt').value='El niño come pan en la casa de su abuela. Buenos días, ¿cómo estás?';
+  $('#file').value='';$('#url').value='';$('#iso').value='';$('#lang').value='yua';};
 $('#go').onclick=async()=>{
   const lang=$('#iso').value.trim()||$('#lang').value;
-  const inp=$('#txt').value.trim()||$('#url').value.trim();
+  const inp=$('#txt').value.trim()||$('#file').value.trim()||$('#url').value.trim();
   if(!lang||!inp){$('#status').textContent='Elige lengua y pega texto o URL';$('#prog').classList.remove('hidden');$('#res').classList.add('hidden');return;}
   $('#go').disabled=true;$('#res').classList.add('hidden');$('#prog').classList.remove('hidden');
   $('#steps').innerHTML='';$('#status').textContent='Iniciando…';
@@ -371,12 +386,14 @@ class H(BaseHTTPRequestHandler):
                 j = JOBS.get(m.group(1))
                 pub = None if j is None else {k: j[k] for k in ("status", "steps", "step", "result", "error") if k in j}
             self._json(200 if pub else 404, pub or {"error": "job not found"}); return
-        m = re.fullmatch(r"/audio/([\w.\-]+\.(?:wav|webm|m4a|mp3|ogg|opus|txt))", p)
+        m = re.fullmatch(r"/audio/([\w.\-]+\.(?:wav|webm|m4a|mp3|mp4|ogg|opus|aac|flac|mpga|mpeg|txt))", p)
         if m:
             f = (OUTPUT_DIR / m.group(1)).resolve()
             if f.parent == OUTPUT_DIR and f.exists():
                 mime = {".wav": "audio/wav", ".webm": "audio/webm", ".m4a": "audio/mp4",
-                        ".mp3": "audio/mpeg", ".ogg": "audio/ogg", ".opus": "audio/ogg",
+                        ".mp3": "audio/mpeg", ".mp4": "video/mp4", ".mpga": "audio/mpeg",
+                        ".mpeg": "audio/mpeg", ".aac": "audio/aac", ".flac": "audio/flac",
+                        ".ogg": "audio/ogg", ".opus": "audio/ogg",
                         ".txt": "text/plain; charset=utf-8"}.get(f.suffix.lower(), "application/octet-stream")
                 self._send(200, f.read_bytes(), mime); return
             self._json(404, {"error": "not found"}); return
@@ -393,6 +410,15 @@ class H(BaseHTTPRequestHandler):
         inp, lang = (body.get("input") or "").strip(), (body.get("lang") or "").strip().lower()
         if not inp or not lang:
             self._json(400, {"error": "faltan input/lang"}); return
+        # Rutas locales: solo cuando parece path a archivo de media — texto con
+        # "/" (p.ej. "y/o") nunca debe ser rechazado como "archivo inválido"
+        if not inp.startswith(("http://", "https://", "www.")):
+            f = Path(inp).expanduser()
+            if ("/" in inp or inp.startswith("~") or "\\" in inp) and f.suffix.lower() in cv.MEDIA_EXTS:
+                ok = (f.is_file()
+                      and str(f.resolve()).startswith(str(Path.home())))
+                if not ok:
+                    self._json(400, {"error": "archivo local no válido — usa una ruta de audio/video real dentro de tu carpeta de usuario"}); return
         if not BUSY.acquire(blocking=False):
             self._json(429, {"error": "Ya hay una conversión en curso — espera a que termine"}); return
         jid = f"{int(time.time()*1000)%10**12:012x}"

@@ -19,6 +19,24 @@
 
 ---
 
+## 2026-11-23 ~05:30 — Devin (mac-lap) — pipeline de entrenamiento + dropdowns + demo
+
+**Se pidió:** recorrer todo el código, dejar lista la parte de entrenar Whisper/LLM propios y el pipeline faltante; arreglar dropdowns del frontend ("no puedo elegir"); config/demo por defecto; .md de lo que falta.
+
+**Hecho:**
+- **Dropdowns arreglados:** bug real — si #iso tenía texto, el <select> era ignorado. Ahora exclusión mutua (elegir catálogo limpia ISO y viceversa), placeholder "(elige del catálogo ↓)", optgroups por tier (★NMT / voz MMS / solo texto), select de motor con todos los backends. E2E nuevo cubre el bug.
+- **Audio local como input:** convert() detecta ruta a archivo de media (whitelist Whisper) → transcribe igual que audio de YouTube. CLI `--audio` o ruta directa; web: campo "archivo local" validado server-side (solo bajo ~/, con extensión de media; texto con "/" como "y/o" no se rechaza — bug propio evitado).
+- **Pipeline de entrenamiento listo para alimentar:** `tools/corpus_tool.py` — `init/validate/status/pack-tts/pack-asr/pack-mt` por ISO. Estructura corpus/<iso>/ (CONSENT.json obligatorio + wavs + metadata.csv + parallel_es.csv). Normaliza audio a wav 22k mono (afconvert nativo), genera datasets en formatos LJSpeech/JSONL. Verificado end-to-end con corpus de prueba.
+- **Scaffolds GPU:** train/train_tts.py (receta finetune-hf-vits/MMS), train_whisper.py (Trainer HF real), train_mt.py (NLLB-600M). Requieren GPU — documentado.
+- **Integración sin código:** `custom_mt` en perfil → translate_ex lo usa con prioridad en 'auto'; `"mms": "./models/tts-x"` local ya funciona via from_pretrained. resolve_language ahora MERGEA extra sobre curadas (extra puede overridear campos, antes era ignorado para curadas — bug latente para hch/tzo/tzh).
+- **Demo:** demo/texto_demo.txt + demo_es.m4a (voz `say` real, 27KB) + `--demo texto|audio` + botón "Cargar ejemplo" en la web.
+- **Doc maestro:** docs/FALTA_Y_COMO_ALIMENTAR.md — qué falta por pieza (doblaje: alineación/mezcla/diarización; datos: corpus/pares/GPU/consentimiento/validación) con comando que lo alimenta. Hallazgo: MMS-ASR (mms-1b-all ~1,000 lenguas) sin probar = spike pendiente.
+- .gitignore: dataset/, corpus/*/wavs/, models/ ignorados; demo m4a con excepción. README actualizado.
+
+**Tests:** 31 unitarios OK + 10 E2E OK (dropdown, validación, hch real, a11y…). corpus_tool verificado init→validate→pack×3.
+
+---
+
 ## 2026-11-23 ~04:30 — Devin (mac-lap) — E2E Playwright + bug de preámbulo LLM cazado
 
 **Se pidió:** seguir probando entrada/salida y corregir ("sigue haciendo todo, haz pruebas").

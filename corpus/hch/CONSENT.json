@@ -1,0 +1,22 @@
+{
+  "iso639_3": "hch",
+  "comunidad": "",
+  "hablantes": [
+    {
+      "nombre": "",
+      "edad": null,
+      "consentimiento": "pendiente"
+    }
+  ],
+  "licencia_datos": "CC-BY-4.0",
+  "uso_permitido": [
+    "entrenar modelos TTS/ASR/MT open-source"
+  ],
+  "uso_prohibido": [
+    "venta de datos",
+    "voces comerciales sin permiso"
+  ],
+  "contacto_comunidad": "",
+  "fecha": "",
+  "notas": "Documentar aquí cómo se obtuvo el consentimiento (asamblea, carta, audio)."
+}

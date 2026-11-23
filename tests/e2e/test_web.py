@@ -108,6 +108,19 @@ class WebE2E(unittest.TestCase):
         self.assertGreater(after, before)
 
     # ── Convertir ───────────────────────────────────────────
+    def test_convertir_dropdown_mutual_exclusion(self):
+        """Elegir del catálogo limpia el ISO libre y viceversa (bug reportado)."""
+        self.page.goto(BASE + "/convertir")
+        self.page.wait_for_selector("#lang option", state="attached", timeout=10000)
+        self.page.fill("#iso", "quz")
+        self.assertEqual(self.page.eval_on_selector("#lang", "el=>el.value"), "")
+        self.page.select_option("#lang", "yua")
+        self.assertEqual(self.page.eval_on_selector("#iso", "el=>el.value"), "")
+        # ejemplo carga texto + selecciona yua
+        self.page.click("#ej")
+        self.assertTrue(self.page.eval_on_selector("#txt", "el=>el.value").strip())
+        self.assertEqual(self.page.eval_on_selector("#lang", "el=>el.value"), "yua")
+
     def test_convertir_form_validation(self):
         self.page.goto(BASE + "/convertir")
         self.page.wait_for_selector("#lang option", state="attached", timeout=10000)

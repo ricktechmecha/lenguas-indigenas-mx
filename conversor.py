@@ -57,6 +57,10 @@ OUTPUT_DIR    = Path(os.getenv("OUTPUT_DIR", "output_audio"))
 OLLAMA_HOST   = os.getenv("OLLAMA_HOST", "http://localhost:11434")
 LLAMA_MODEL   = os.getenv("LLAMA_MODEL", "llama3.1:8b")
 GROQ_MODEL    = os.getenv("GROQ_MODEL", "openai/gpt-oss-120b")
+
+# Audio/video aceptado como fuente local o descargada (whitelist de Whisper API)
+MEDIA_EXTS = {".mp3", ".mp4", ".m4a", ".wav", ".webm", ".ogg", ".opus",
+              ".aac", ".flac", ".mpga", ".mpeg"}
 OCLOUD_MODEL  = os.getenv("OLLAMA_CLOUD_MODEL", "gemma4:31b")
 CEREBRAS_MODEL= os.getenv("CEREBRAS_MODEL", "gpt-oss-120b")
 
@@ -151,18 +155,21 @@ def _mms_catalog() -> dict:
     return _MMS_CATALOG
 
 def resolve_language(code: str) -> Optional[dict]:
-    """Resuelve un código de lengua a {name, mms, hint}. Cachea en LANGUAGES."""
+    """Resuelve un código de lengua a {name, mms, hint, custom_mt?, …}.
+    languages_extra.json puede OVERRIDEAR cualquier lengua curada (p.ej. para
+    apuntar 'mms' a un checkpoint propio o declarar 'custom_mt')."""
     code = code.strip().lower()
-    if code in LANGUAGES:
-        return LANGUAGES[code]
     for code_key in (code, code.replace("-", "_")):
         extra = _extra_languages().get(code_key)
         if extra:
-            info = {"name": extra.get("name", code_key),
-                    "mms":  extra.get("mms"),
-                    "hint": extra.get("hint", extra.get("name", code_key))}
+            base = LANGUAGES.get(code_key) or LANGUAGES.get(code) or {}
+            info = {**base, **extra}  # el pack del usuario gana campo por campo
+            info.setdefault("name", code_key)
+            info.setdefault("hint", info.get("name", code_key))
             LANGUAGES[code_key] = info
             return info
+    if code in LANGUAGES:
+        return LANGUAGES[code]
     catalog = _mms_catalog()
     if code not in catalog and code in LANG_ALIASES and LANG_ALIASES[code] in catalog:
         alias = LANG_ALIASES[code]
@@ -557,8 +564,30 @@ def _looks_degenerate(src: str, out: str) -> bool:
             return True
     return False
 
+_MT_CACHE: dict = {}
+
+def translate_with_custom(text: str, lang_code: str) -> Optional[str]:
+    """Checkpoint seq2seq propio (fine-tune NLLB/T5) declarado en el perfil
+    como 'custom_mt' — un modelo entrenado CON la comunidad manda sobre
+    cualquier LLM genérico. Devuelve None si no hay checkpoint."""
+    info = LANGUAGES.get(lang_code) or resolve_language(lang_code) or {}
+    model_id = info.get("custom_mt")
+    if not model_id:
+        return None
+    try:
+        if model_id not in _MT_CACHE:
+            from transformers import pipeline
+            print(f"  🧠 Cargando traductor propio: {model_id}")
+            _MT_CACHE[model_id] = pipeline("translation", model=model_id, device=-1)
+        out = _MT_CACHE[model_id](text, max_length=256)
+        return out[0]["translation_text"].strip()
+    except Exception as e:
+        print(f"  ⚠️  custom_mt '{model_id}': {type(e).__name__} {e}")
+        return None
+
 # Orden 'auto': gratis primero (Groq), luego Gemini (si hay key), nubes de pago, local al final.
 TRANSLATORS = {
+    "custom":       (translate_with_custom,       None,          "checkpoint propio (custom_mt)"),
     "google":       (translate_with_google,       None,          "Google Translate"),
     "groq":         (translate_with_groq,         GROQ_KEYS,     "GROQ_API_KEY"),
     "gemini":       (translate_with_gemini,       GOOGLE_KEYS,   "GOOGLE_API_KEY"),
@@ -571,6 +600,11 @@ AUTO_ORDER = ["google", "groq", "gemini", "ollama-cloud", "cerebras", "llama"]
 
 def translate_ex(text: str, lang_code: str, translator: str = "auto") -> tuple:
     """Traduce y devuelve (traducción | None, motor usado | None)."""
+    # Modelo propio entrenado con la comunidad tiene prioridad en 'auto'
+    if translator == "auto":
+        t = translate_with_custom(text, lang_code)
+        if t and not _looks_degenerate(text, t):
+            return t, "custom"
     order = AUTO_ORDER if translator == "auto" else [translator]
     for name in order:
         fn, keys, env_hint = TRANSLATORS[name]
@@ -761,28 +795,37 @@ def convert(input_source: str, lang_code: str = "nah", output_name: str = None,
     
     # ── PASO 1: Obtener texto en español ──
     spanish_text = None
-    
+    src_media = None  # archivo de audio/video fuente (YouTube o local)
+
     if input_source.startswith(("http://", "https://", "www.")):
         step_cb("download")
         print("\n📥 PASO 1: Descargando video...")
         with tempfile.TemporaryDirectory() as tmp:
             tmp_path  = Path(tmp)
-            mp3_file  = download_youtube(input_source, tmp_path)
-            if not mp3_file:
+            src_media = download_youtube(input_source, tmp_path)
+            if not src_media:
                 print("❌ No se pudo descargar el video")
                 return result
-            
             # Save audio (conservar extensión real: m4a/webm/mp3…)
-            mp3_dest = OUTPUT_DIR / f"{base_name}{mp3_file.suffix}"
-            mp3_dest.write_bytes(mp3_file.read_bytes())
-            result["files"]["audio_fuente"] = str(mp3_dest)
-            
-            step_cb("transcribe")
-            print("\n📝 PASO 2: Transcribiendo audio...")
-            spanish_text = transcribe(mp3_dest, stt)
+            mp3_dest = OUTPUT_DIR / f"{base_name}{src_media.suffix}"
+            mp3_dest.write_bytes(src_media.read_bytes())
+            src_media = mp3_dest
     else:
-        print("\n📝 PASO 1: Texto recibido directamente")
-        spanish_text = input_source
+        local = Path(input_source).expanduser()
+        if local.is_file() and local.suffix.lower() in MEDIA_EXTS:
+            print(f"\n📂 PASO 1: Archivo local {local.name}")
+            mp3_dest = OUTPUT_DIR / f"{base_name}{local.suffix.lower()}"
+            mp3_dest.write_bytes(local.read_bytes())
+            src_media = mp3_dest
+        else:
+            print("\n📝 PASO 1: Texto recibido directamente")
+            spanish_text = input_source
+
+    if src_media:
+        result["files"]["audio_fuente"] = str(src_media)
+        step_cb("transcribe")
+        print("\n📝 PASO 2: Transcribiendo audio...")
+        spanish_text = transcribe(src_media, stt)
     
     if not spanish_text:
         print("❌ Sin texto para procesar")
@@ -902,11 +945,16 @@ Ejemplos:
     parser.add_argument("--outdir", default="output_audio",
                         help="Directorio de salida (default: output_audio)")
     parser.add_argument("--translator", "-t", default="auto",
-                        choices=["auto", "google", "groq", "gemini", "ollama-cloud", "cerebras", "llama"],
+                        choices=["auto", "google", "groq", "gemini", "ollama-cloud", "cerebras", "llama", "custom"],
                         help="Traductor: auto (Google NMT si hay par, luego LLMs), google, groq, gemini, "
                              "ollama-cloud, cerebras, o llama (Ollama local)")
     parser.add_argument("--stt", default="auto", choices=["auto", "groq", "local"],
                         help="Transcripción: auto (Groq si hay key), groq (Whisper API), local (whisper CLI)")
+    parser.add_argument("--demo", choices=["texto", "audio"], default=None,
+                        help="Demo rápida: 'texto' usa demo/texto_demo.txt, "
+                             "'audio' transcribe demo/demo_es.m4a (pipeline completo)")
+    parser.add_argument("--audio", "-a", default=None,
+                        help="Ruta de audio/video local a transcribir (igual que pasar la ruta como input)")
     
     args = parser.parse_args()
     
@@ -937,11 +985,18 @@ Ejemplos:
         print()
         return
     
-    if not args.input:
+    inp = args.input
+    if args.audio:
+        inp = args.audio
+    if args.demo:
+        demo_dir = Path(__file__).resolve().parent / "demo"
+        inp = (str(demo_dir / "demo_es.m4a") if args.demo == "audio"
+               else (demo_dir / "texto_demo.txt").read_text(encoding="utf-8").strip())
+    if not inp:
         parser.print_help()
         return
     
-    result = convert(args.input, args.lang, args.output, args.translator, args.stt)
+    result = convert(inp, args.lang, args.output, args.translator, args.stt)
     sys.exit(0 if result.get("files") else 1)
 
 

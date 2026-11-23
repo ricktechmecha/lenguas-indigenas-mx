@@ -160,7 +160,29 @@ python3 conversor.py "texto" --lang mix --outdir ./salida
 # Fully offline: translate with local Llama via Ollama instead of Gemini
 # (requires: brew install ollama && ollama pull llama3.1:8b && ollama serve)
 python3 conversor.py "texto" --lang nah --translator llama
+
+# Local audio/video file → transcription → translation → voice
+python3 conversor.py ~/Downloads/mi_audio.mp3 --lang nah
+
+# Demo instantánea (sin escribir texto ni bajar nada)
+python3 conversor.py --demo texto --lang yua   # texto de prueba incluido
+python3 conversor.py --demo audio --lang yua   # transcribe demo/demo_es.m4a
 ```
+
+**Entrenar una lengua nueva** (corpus consentido → modelos propios):
+
+```bash
+python3 tools/corpus_tool.py init hch        # esqueleto + CONSENT.json
+#  → meter wavs/, metadata.csv, parallel_es.csv, firmar consentimiento
+python3 tools/corpus_tool.py validate hch    # ¿datos OK?
+python3 tools/corpus_tool.py pack-tts hch    # → dataset/ para fine-tune
+# Entrenar en GPU: train/train_tts.py, train_whisper.py, train_mt.py
+# Integrar el checkpoint sin código: languages_extra.json
+#   { "hch": {"mms": "./models/tts-hch", "custom_mt": "./models/mt-hch"} }
+```
+
+Ver `train/README.md` (comandos GPU) y `docs/FALTA_Y_COMO_ALIMENTAR.md`
+(checklist maestro de qué falta por pieza e idioma).
 
 **Frontend web** (sin build steps):
 
@@ -192,6 +214,7 @@ en `gtranslate.GT_BY_MMS`.
 | `ollama-cloud` | ollama.com hosted models (`OLLAMA_CLOUD_MODEL`, default `gemma4:31b`) | Paid credits |
 | `cerebras` | cerebras.ai (`CEREBRAS_MODEL`, default `gpt-oss-120b`) | Paid |
 | `llama` | Local Llama via [Ollama](https://ollama.com) — no key, works offline | Free |
+| `custom` | Your own fine-tuned seq2seq (`custom_mt` in `languages_extra.json`) | Free |
 
 **Transcription options** (`--stt`, YouTube input only): `auto` (default — Groq
 Whisper API when `GROQ_API_KEY` is set, else local `whisper` CLI), `groq`, `local`.

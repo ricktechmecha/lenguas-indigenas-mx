@@ -20,5 +20,13 @@
     "name": "Ejemplo sin checkpoint MMS — solo traducción",
     "mms": null,
     "hint": "nombre y variante exacta para el prompt del traductor"
+  },
+
+  "hch": {
+    "name": "Wixárika (voz comunitaria)",
+    "mms": "./models/tts-hch",
+    "custom_mt": "./models/mt-hch",
+    "hint": "wixárika/huichol de Jalisco",
+    "_nota": "mms y custom_mt aceptan dir local o repo HF — así se integran los checkpoints entrenados con train/*.py"
   }
 }

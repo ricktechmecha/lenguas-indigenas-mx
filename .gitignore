@@ -28,3 +28,13 @@ data/_wals/
 # cachés regenerables de datos lingüísticos
 data/_phoible/
 data/_grambank/
+
+# Datasets empaquetados para entrenamiento (regenerables con corpus_tool.py)
+dataset/
+# Audio del corpus comunitario (wavs reales = datos sensibles, nunca al repo)
+corpus/*/wavs/
+# Modelos entrenados (binarios grandes; se publican aparte)
+models/
+
+# excepción: audio de demo sí va al repo
+!demo/demo_es.m4a
