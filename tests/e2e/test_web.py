@@ -150,7 +150,8 @@ class WebE2E(unittest.TestCase):
         self.page.select_option("#lang", "hch")
         self.page.fill("#txt", "Buenos días, ¿cómo estás?")
         self.page.click("#go")
-        self.page.wait_for_selector("#res:not(.hidden)", timeout=180000)
+        # El fallback local (Ollama) puede tardar minutos en timeout — camino real
+        self.page.wait_for_selector("#res:not(.hidden)", timeout=480000)
         body = self.page.inner_text("#res")  # incluye badges + resultado
         low = body.lower()
         # El pipeline puede traducir (Groq/Llama) o fallar limpio — ambos son

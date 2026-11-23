@@ -483,9 +483,10 @@ def _ollama_local_model() -> Optional[str]:
     except Exception:
         return LLAMA_MODEL  # sin servicio; el caller reporta el error
 
-def translate_with_llama(text: str, lang_code: str, retries: int = 2) -> Optional[str]:
+def translate_with_llama(text: str, lang_code: str, retries: int = 1) -> Optional[str]:
     """Traduce con Llama local vía Ollama (sin API key, sin costo, sin nube).
-    Requiere: `ollama serve` corriendo y un modelo llama descargado."""
+    Requiere: `ollama serve` corriendo y un modelo llama descargado.
+    retries bajo: un Ollama que no responde en ~2min no va a producir nada útil."""
     lang_name = LANGUAGES[lang_code]["name"]
     prompt    = _translation_prompt(text, lang_code)
     model     = _ollama_local_model()
@@ -503,7 +504,7 @@ def translate_with_llama(text: str, lang_code: str, retries: int = 2) -> Optiona
                 data=json.dumps(payload).encode(),
                 headers={"Content-Type": "application/json"}, method="POST"
             )
-            with urllib.request.urlopen(req, timeout=180) as r:
+            with urllib.request.urlopen(req, timeout=120) as r:
                 resp = json.loads(r.read())
             translation = resp["message"]["content"].strip()
             print(f"  ✅ Traducido a {lang_name} (Llama local): {translation[:80]}...")

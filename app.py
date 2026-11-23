@@ -69,7 +69,7 @@ def run_job(job_id: str, inp: str, lang: str, translator: str):
             pass
         with JOBS_LOCK:
             j = JOBS[job_id]
-            j["status"] = "done" if res.get("files") else "error"
+            j["status"] = "error" if res.get("error") else ("done" if res.get("files") else "error")
             j["result"] = {
                 "lang_name": res.get("lang_name"),
                 "engine": res.get("engine"),
