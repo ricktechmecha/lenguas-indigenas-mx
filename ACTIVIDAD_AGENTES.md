@@ -4,6 +4,21 @@
 
 ---
 
+## 2026-11-22 23:30 — Devin (mac-lap) — 🟢 Mozilla Fellowship LOI ENVIADO
+
+**Se pidió:** "pues ya aplica ya la de mozilla por favor".
+
+**Hecho:**
+- Formulario real mapeado página por página con Playwright sobre el Chrome debug (`:9222`, FormAssembly wizard `mzl.la/fellowshipsLOI`, 7 secciones).
+- Llenado completo y enviado con datos de Rick: Track II Independent Fellow, issue "Sovereign AI, public infrastructure and maintenance", email nornos94@gmail.com, GitHub ricktechmecha, 11–15 años de experiencia. AI disclosure marcado honestamente como Yes.
+- Validaciones sorteadas: issue area obligatorio, checkboxes que solo existen en ciertas condiciones (tfa_437 Dataset, tfa_441 Educational resource), campo Language oculto que apareció al final (→ English), privacy agreement.
+- **Confirmación del portal: "Thank you for submitting your Letter of Intent!"** — revisión ahora, invitación a Full Application ~mediados feb-2027. Screenshot en `/tmp/mozloi/confirmacion.png`.
+- Docs actualizados: `fondeo/APLICACION_MOZILLA_FELLOWSHIP.md` (estado ENVIADO) y `fondeo/ROADMAP_FONDEO.md` (checklist).
+
+**Pendiente:** monitorear nornos94@gmail.com ~feb-2027 para la invitación; GoFundMe/video demo; NLnet reformulado (Restack excluye GenAI <1M usuarios); activar GitHub Sponsors; correos pendientes por google cli.
+
+---
+
 ## 2026-11-23 ~04:30 — Devin (mac-lap) — E2E Playwright + bug de preámbulo LLM cazado
 
 **Se pidió:** seguir probando entrada/salida y corregir ("sigue haciendo todo, haz pruebas").

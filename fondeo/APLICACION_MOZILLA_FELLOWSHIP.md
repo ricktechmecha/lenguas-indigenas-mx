@@ -1,4 +1,7 @@
-# Mozilla Foundation Fellowship 2027 — borrador listo para enviar
+# Mozilla Foundation Fellowship 2027 — ✅ LOI ENVIADO 22-nov-2026
+
+**Estado: LOI enviado y confirmado por el portal.** Respuestas/invitaciones a Full Application: ~mediados de feb-2027. Contacto oficial: fellowships@mozillafoundation.org.
+Se envió como **Track II: Independent Fellow**, issue area **"Sovereign AI, public infrastructure and maintenance"**, con email nornos94@gmail.com. Este archivo queda como registro del contenido base.
 
 **Deadline LOI: jueves 17-dic-2026, 11:59 PM PT** — ~3 semanas.
 Premio: hasta **$125,000 USD / 12 meses**. Tracks: Embedded e Independent.

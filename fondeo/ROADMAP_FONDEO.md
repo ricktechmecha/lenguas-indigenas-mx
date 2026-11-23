@@ -44,7 +44,7 @@
 
 ## ✅ Checklist semanal
 
-- [ ] **ENVIAR Mozilla LOI antes del 17-dic** ← lo único urgente real
+- [x] **ENVIADO Mozilla LOI — 22-nov-2026** ✅ (Track II Independent · Sovereign AI). Invitación a Full Application ~mediados feb-2027
 - [ ] Push de `funding.json`, `FUNDING.yml` + docs a GitHub (hecho)
 - [ ] Activar GitHub Sponsors: github.com/sponsors → enroll
 - [ ] Enviar funding.json en floss.fund/submit
