@@ -85,6 +85,12 @@ class TestOutputGuards(unittest.TestCase):
         self.assertFalse(cv._looks_refusal("Kawá, kawá wá?"))
         self.assertFalse(cv._looks_refusal("Le chan xi'ipalo' ku janal waaj."))
 
+    def test_llm_preamble_detected(self):
+        # Caso real capturado por E2E: Llama respondió con preámbulo, no traducción
+        preamble = ("I'm happy to help with the translation. However, I need to "
+                    "clarify that I'll be using the Wixárika language")
+        self.assertTrue(cv._looks_refusal(preamble))
+
     def test_degenerate_loop(self):
         loop = "kualtin " * 30
         self.assertTrue(cv._looks_degenerate("hola", loop))

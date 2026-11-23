@@ -309,7 +309,8 @@ def _lang_profiles() -> dict:
         import csv
         p = Path(__file__).resolve().parent / "data" / "language_profiles.csv"
         try:
-            _LANG_PROFILES = {r["iso639_3"]: r for r in csv.DictReader(p.open(encoding="utf-8"))}
+            with p.open(encoding="utf-8") as f:
+                _LANG_PROFILES = {r["iso639_3"]: r for r in csv.DictReader(f)}
         except Exception:
             _LANG_PROFILES = {}
     return _LANG_PROFILES
@@ -529,7 +530,13 @@ def google_supported(lang_code: str) -> bool:
 
 _REFUSALS = ("i'm sorry", "i’m sorry", "i am sorry", "sorry, i can", "i can't provide",
              "i can’t provide", "i cannot provide", "lo siento", "no puedo proporcionar",
-             "no dispongo de", "as an ai", "i don't have enough", "i don’t have enough")
+             "no dispongo de", "as an ai", "i don't have enough", "i don’t have enough",
+             # preámbulos/meta-comentario del LLM — no son traducción
+             "i'm happy to help", "i’d be happy to", "i'd be happy to",
+             "i'll be using", "i will be using", "i need to clarify",
+             "here is the translation", "here's the translation", "here is your translation",
+             "let me translate", "let me provide", "the translation is:",
+             "(note:", "note: i've", "note: i have")
 
 def _looks_refusal(out: str) -> bool:
     """El LLM se negó o se disculpó en vez de traducir — NO es una traducción,

@@ -201,6 +201,15 @@ para cerrar el hueco que los LLMs frontera no resuelven (medido: 0.01 en zapotec
 verifícala con un hablante nativo antes de usarla en producción. La voz es <b>síntesis</b>
 (Meta MMS-TTS), no una persona real. No distribuyas audio generado como "voz de la comunidad"
 sin consentimiento. Código y datos: MIT/CC-BY según fuente.</div>
+<script>
+const $=s=>document.querySelector(s);
+fetch('/api/coverage').then(r=>r.json()).then(d=>{
+  const T={A:['🟢','voz + traducción NMT','t-ok'],B:['🟡','voz MMS, traducción débil','t-warn'],C:['🔵','solo texto','t-info']};
+  $('#tiers').innerHTML=['A','B','C'].map(t=>{const n=(d.tiers[t]||[]).length,[e,desc,cls]=T[t];
+    return `<div class="tier ${cls}"><b>${e} ${n}</b><span style="color:var(--mut);font-size:.85rem">${desc}</span></div>`;}).join('')
+    +`<div class="tier" style="border-color:#3a1420"><b>🔴 ~6,880</b><span style="color:var(--mut);font-size:.85rem">sin datos — el resto del mundo</span></div>`;
+}).catch(()=>{$('#tiers').innerHTML='<div class="card err">Error cargando cobertura</div>';});
+</script>
 """)
 
 PAGE_COBERTURA = page("Cobertura mundial de lenguas", NAV + r"""
@@ -343,7 +352,7 @@ class H(BaseHTTPRequestHandler):
         self.send_header("X-Content-Type-Options", "nosniff")
         self.send_header("Referrer-Policy", "no-referrer")
         self.send_header("Content-Security-Policy",
-                         "default-src 'self'; style-src 'unsafe-inline'; media-src 'self' blob:")
+                         "default-src 'self'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; media-src 'self' blob:")
         for k, v in (extra or {}).items(): self.send_header(k, v)
         self.end_headers(); self.wfile.write(data)
     def _json(self, code, obj): self._send(code, json.dumps(obj, ensure_ascii=False))

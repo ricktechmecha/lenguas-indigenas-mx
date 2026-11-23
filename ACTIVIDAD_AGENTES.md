@@ -4,6 +4,22 @@
 
 ---
 
+## 2026-11-23 ~04:30 — Devin (mac-lap) — E2E Playwright + bug de preámbulo LLM cazado
+
+**Se pidió:** seguir probando entrada/salida y corregir ("sigue haciendo todo, haz pruebas").
+
+**Hecho:**
+- `tests/e2e/test_web.py` — 9 tests con Playwright/Chromium real contra app.py en puerto efímero: APIs, tabla cobertura (filtros/paginación), validación del form, idioma inválido con sugerencias, a11y básico (h1/skip/labels/aria-live), landing, y conversión REAL a hch (text-only).
+- **BUG REAL cazado por E2E:** Llama devolvía preámbulo ("I'm happy to happy to help with the translation… I'll be using Wixárika… (Note: …)") que pasaba el guard anti-disculpas y se habría mostrado/sintetizado como traducción. Ampliado `_REFUSALS` en conversor.py con patrones de preámbulo/meta-comentario ("i'm happy to help", "i'll be using", "here is the translation", "(note:", "note: i've"…). Ahora se descarta y cae al siguiente motor o falla limpio.
+- Bug menor: `language_profiles.csv` abría archivo sin cerrar (ResourceWarning) → context manager.
+- Fix de test: `page.content()` siempre contiene "<audio" en el JS inline → assert cambiado a locator real `#res audio` count==0; lectura de `#res` (incluye badges) en vez de `#result`.
+- Landing: tiers de cobertura ahora se llenan por JS desde /api/coverage (antes estáticos); CSP actualizado con `script-src 'unsafe-inline'`.
+- Resultado: **31 unitarios OK + 9/9 E2E OK.**
+
+**Pendiente:** validación por hablantes nativos; alineación temporal para doblaje; corpus consentido tier C/D.
+
+---
+
 ## 2026-11-23 ~03:30 — Devin (mac-lap) — skills ECC aplicadas: a11y + review + tests
 
 **Se pidió:** revisar frontend/backend con las skills del proyecto ECC (code review, tests, diseño).
